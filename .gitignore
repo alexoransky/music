@@ -130,3 +130,6 @@ dmypy.json
 
 # Sound Fonts
 *.sf2
+
+# PyCharm
+.idea/
