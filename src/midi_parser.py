@@ -62,6 +62,9 @@ class MIDIParser:
             self.print_notes()
             return
 
+        if len(self.notes) == 0:
+            return
+
         n = re.search(NOTE_OFF_RE, msg)
         if n is not None:
             # note = MIDINote(int(n.group(CHANNEL)), int(n.group(NOTE)), int(n.group(VELOCITY)))
