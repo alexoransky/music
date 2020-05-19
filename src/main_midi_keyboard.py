@@ -1,6 +1,8 @@
 import signal
 import sys
 
+from pprint import pprint
+
 from synth import Synth
 from midi_router import MIDIRouter
 from midi_parser import MIDIParser
@@ -8,7 +10,11 @@ from termcolor import cprint
 
 
 PORT_IN = "Arturia"
-PORT_OUT = "FluidSynth"
+
+if sys.platform == "darwin":
+    PORT_OUT = "FluidSynth"
+else:
+    PORT_OUT = "FLUID Synth"
 
 
 synth = None
@@ -37,13 +43,35 @@ def init_midi_router():
     for port in in_ports:
         if PORT_IN in port:
             port_in = port
+            break
 
     for port in out_ports:
         if PORT_OUT in port:
             port_out = port
+            break
 
     midi_router = MIDIRouter(port_in=port_in, port_out=port_out)
     return midi_router.start()
+
+
+def list_ports():
+    global synth
+    global midi_router
+
+    synth = Synth()
+    synth.start()
+
+    # find input and output MIDI ports
+    in_ports = MIDIRouter.available_ports(output=False)
+    out_ports = MIDIRouter.available_ports(output=True)
+
+    cprint("Input MIDI ports:", "blue")
+    pprint(in_ports)
+    cprint("Output MIDI ports:", "blue")
+    pprint(out_ports)
+
+    midi_router.stop()
+    synth.stop()
 
 
 def main():
@@ -63,6 +91,11 @@ def main():
 
 
 if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        if sys.argv[1].lower() == "-l":
+            list_ports()
+            sys.exit(0)
+
     signal.signal(signal.SIGINT, signal_handler)
     cprint("Press Ctrl+C to stop.", "yellow")
 
