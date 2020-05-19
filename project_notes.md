@@ -26,6 +26,13 @@ https://en.wikipedia.org/wiki/MIDI
 https://en.wikipedia.org/wiki/Scientific_pitch_notation
 https://en.wikipedia.org/wiki/Chord_(music)
 
+FluidSynth
+----------
+FluidSynth is used to generate sound on both macOS and Linux.
+http://www.fluidsynth.org
+APIs:
+http://www.fluidsynth.org/api/index.html
+
 04/15/2020
 ----------
 Project created
@@ -116,3 +123,10 @@ an access them.
 05/10/2020
 ----------
 Added a MIDI parser to print notes and chords that are being played.
+
+05/18/2020
+----------
+Added the project on github.
+Started porting to Linux. Fluidsynth 2.1.2 is installed on Arch.  
+Fluidsynth 2.1.2 has updated APIs: http://www.fluidsynth.org/api/
+I had to patch the fluidsynth.py to support those.  This is not complete bindings but works for this project.
