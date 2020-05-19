@@ -34,10 +34,13 @@ Follow installation steps Xb, like 3b for FluidSynth.
 
 3a. Install SDL, SDL2 and other prerequisites to output MIDI:
 brew install sdl sdl2 sdl_image sdl_mixer sdl_ttf portmidi
+
 4a. Install pygame
 pip3 install pygame
+
 5a. Install SimpleSynth, see instructions:
 https://notahat.com/simplesynth/
+
 6a. Use main_pygame as an example.
 Leave SympleSynth running while you run Python scripts.
 Note that main_pygame will work with any sinthesizer, it just need to be running.
@@ -47,10 +50,7 @@ pip3 install pyfluidsynth
 copy the patches/fluidsynthpath.py to where it is installed:
 /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/fluidsynth.py
 
-4b. (macOS only) Install osascript
-This is needed to control output volume in macOS.
-
-5b. Install FluidSynth, see instructions:
+4b. Install FluidSynth, see instructions:
 https://github.com/frescobaldi/frescobaldi/wiki/MIDI-playback-on-Mac-OS-X
 Note that PyFluidSynth does not support FluidSynth as of 4/25/2020:
 https://github.com/nwhitehead/pyfluidsynth/issues/19
@@ -60,18 +60,18 @@ brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/34dcd1ff65
 
 Note that the latest FS (v2.1.2 as 5/18/2020) is available for Linux.
 
-6b.
+5b.
 Replace fluidsynth.py in your Python sites library dir with the one provided in patches/osx folder.
 Select the version according to your OS.
 
-7b. Download sound fonts in SF2 format.
+6b. Download sound fonts in SF2 format.
 Sound fonts need to be place in data folder.
 
-8. Install mido library to work with MIDI keyboards
+7. Install mido library to work with MIDI keyboards
 pip install mido
 pip install python-rtmidi
 
-9. Install termcolor, num2words
+8. Install termcolor, num2words
 
 
 Other resources
