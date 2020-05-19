@@ -56,7 +56,6 @@ def init_midi_router():
 
 def list_ports():
     global synth
-    global midi_router
 
     synth = Synth()
     synth.start()
@@ -70,7 +69,6 @@ def list_ports():
     cprint("Output MIDI ports:", "blue")
     pprint(out_ports)
 
-    midi_router.stop()
     synth.stop()
 
 
