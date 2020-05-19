@@ -19,7 +19,7 @@ Installation
 
 1. Install Python
 
-2. Install XCode CLT from:
+2. (macOS only) Install XCode CLT from:
 https://developer.apple.com/download/more/
 
 3. Choose between SimpleSynth and FluidSynth.
@@ -47,23 +47,31 @@ pip3 install pyfluidsynth
 copy the patches/fluidsynthpath.py to where it is installed:
 /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/fluidsynth.py
 
-4b. Install osascript
+4b. (macOS only) Install osascript
 This is needed to control output volume in macOS.
 
 5b. Install FluidSynth, see instructions:
 https://github.com/frescobaldi/frescobaldi/wiki/MIDI-playback-on-Mac-OS-X
 Note that PyFluidSynth does not support FluidSynth as of 4/25/2020:
 https://github.com/nwhitehead/pyfluidsynth/issues/19
-Instead of
-homebrew install fluid-synth
-You will need to install old FS 1.11.1:
+Instead of 'homebrew install fluid-synth' which installs the latest FS,
+you might want to install old FS v1.11.1:
 brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/34dcd1ff65a56c3191fa57d3dd23e7fffd55fae8/Formula/fluid-synth.rb
 
-6b. Download sound fonts in SF2 format.
+Note that the latest FS (v2.1.2 as 5/18/2020) is available for Linux.
 
-6c. Install mido library to work with MIDI keyboards
+6b.
+Replace fluidsynth.py in your Python sites library dir with the one provided in patches/osx folder.
+Select the version according to your OS.
+
+7b. Download sound fonts in SF2 format.
+Sound fonts need to be place in data folder.
+
+8. Install mido library to work with MIDI keyboards
 pip install mido
 pip install python-rtmidi
+
+9. Install termcolor, num2words
 
 
 Other resources
