@@ -1,12 +1,20 @@
 import time
 from pathlib import Path
 import fluidsynth
-import osascript
+
+from sys import platform
+if platform == "darwin":
+    import osascript
 
 SOUND_FONT = "data/Nice-Keys-B-Plus-JN1.4.sf2"
 
-FS_DRIVER = "coreaudio"
-FS_MIDI_DRIVER = "coremidi"
+if platform == "darwin":
+    FS_DRIVER = "coreaudio"
+    FS_MIDI_DRIVER = "coremidi"
+else:
+    FS_DRIVER = "alsa"
+    FS_MIDI_DRIVER = "alsa_seq"
+
 FS_DEVICE = "default"
 
 FS_CPU_CORES = 2
@@ -40,12 +48,17 @@ class Synth:
     def stop(self):
         # FluidSynth outputs some noise when the destructor is called
         # set system volume to 0 to avoid that
-        code, prev_out, prev_err = osascript.run('output volume of (get volume settings)')
-        cmd = "set volume output volume "
-        code, out, err = osascript.run(cmd + "0")
-        self.fs.delete()
-        if prev_err is None or prev_err == "":
-            code, out, err = osascript.run(cmd + prev_out)
+
+        if platform == "darwin":
+            code, prev_out, prev_err = osascript.run('output volume of (get volume settings)')
+            cmd = "set volume output volume "
+            code, out, err = osascript.run(cmd + "0")
+            self.fs.delete()
+            if prev_err is None or prev_err == "":
+                code, out, err = osascript.run(cmd + prev_out)
+        else:
+            time.sleep(1)
+            self.fs.delete()
 
     def play(self, notes, chord=False, velocity=FS_VELOCITY, wait=FS_LENGTH):
         if chord:
