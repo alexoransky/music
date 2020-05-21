@@ -130,3 +130,8 @@ Added the project on github.
 Started porting to Linux. Fluidsynth 2.1.2 is installed on Arch.  
 Fluidsynth 2.1.2 has updated APIs: http://www.fluidsynth.org/api/
 I had to patch the fluidsynth.py to support those.  This is not complete bindings but works for this project.
+
+05/19/2020
+----------
+Removed the code to reduce the volume in macOS when FLuidSynth is stopping.
+Added a delay of 1 second instead.
