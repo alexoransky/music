@@ -135,3 +135,12 @@ I had to patch the fluidsynth.py to support those.  This is not complete binding
 ----------
 Removed the code to reduce the volume in macOS when FLuidSynth is stopping.
 Added a delay of 1 second instead.
+
+05/20/2020
+----------
+Need to investigate how to create a PyQt tabbed app without the Qt GUI builder.
+Added a simple GUI app with tabs.  
+
+05/21/2020
+----------
+The GUI app is moved to midi project.
