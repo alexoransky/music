@@ -76,6 +76,18 @@ class MIDIRouter:
 
         return mido.get_input_names()
 
+    def open_port(self, port: str, output=False):
+        if port is None or port == "":
+            return
+
+        if self.enabled:
+            self.stop()
+
+        if output:
+            self.port_out.open(port, output=True)
+        else:
+            self.port_in.open(port, output=False, callback=self.input_message_handler)
+
     def input_message_handler(self, message):
         if not self.enabled:
             return
@@ -95,6 +107,11 @@ class MIDIRouter:
 
         return message
 
+    def clear_messages(self):
+        while True:
+            if self.get_message() is None:
+                return
+
     def start(self):
         self.enabled = self.port_in.is_open() and self.port_out.is_open()
         return self.enabled
@@ -103,3 +120,4 @@ class MIDIRouter:
         self.enabled = False
         self.port_in.close()
         self.port_out.close()
+        self.clear_messages()
