@@ -17,15 +17,19 @@ class MIDIPort:
     def open(self, port_name, output=True, callback=None):
         self.close()
 
-        open_fn = mido.open_input
         if output:
-            open_fn = mido.open_output
-
-        try:
-            self.port = open_fn(port_name, callback=callback)
-        except:
-            self.port = None
-            return
+            try:
+                self.port = mido.open_output(port_name, autoreset=True)
+                self.port.reset()
+            except:
+                self.port = None
+                return
+        else:
+            try:
+                self.port = mido.open_input(port_name, callback=callback)
+            except:
+                self.port = None
+                return
 
         self.name = port_name
 
@@ -53,6 +57,12 @@ class MIDIPort:
 
     def is_open(self):
         return self.port is not None
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return self.name
 
 
 class MIDIRouter:
