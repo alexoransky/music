@@ -71,4 +71,4 @@ if __name__ == "__main__":
     play_chord(synth, ch_c3)
     play_notes(synth, ch_c3.notes + ch_c4.notes, chord=True)
 
-    synth.stop()
+    synth.stop(delay_sec=1)
