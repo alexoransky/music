@@ -43,8 +43,9 @@ class Synth:
         self.fs.program_select(chan=FS_CHANNEL, sfid=self.sfid, bank=FS_BANK, preset=FS_PRESET)
         self.fs.cc(chan=FS_CHANNEL, ctrl=FS_CTRL_VOLUME, val=FS_VOLUME)
 
-    def stop(self):
-        time.sleep(FS_STOP_DELAY_SEC)
+    def stop(self, delay_sec=0):
+        if delay_sec > 0:
+            time.sleep(delay_sec)
         self.fs.delete()
 
     def play(self, notes, chord=False, velocity=FS_VELOCITY, wait=FS_LENGTH):
