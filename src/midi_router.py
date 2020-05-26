@@ -80,9 +80,6 @@ class MIDIRouter:
         if port is None or port == "":
             return
 
-        if self.enabled:
-            self.stop()
-
         if output:
             self.port_out.open(port, output=True)
         else:
