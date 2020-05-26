@@ -33,6 +33,14 @@ http://www.fluidsynth.org
 APIs:
 http://www.fluidsynth.org/api/index.html
 
+Lilypond
+--------
+Lilypond is the software that allows to store music in text-based files instead of sheets.
+http://lilypond.org
+Frescobaldi is GUI for the Lilypond:
+https://www.frescobaldi.org
+
+
 04/15/2020
 ----------
 Project created
@@ -144,3 +152,24 @@ Added a simple GUI app with tabs.
 05/21/2020
 ----------
 The GUI app is moved to midi project.
+
+05/22/2020
+----------
+Added support for FLuid Synth to the GUI app.
+Added a simple MIDI router to the GUI app.
+
+05/25/2020
+----------
+LilyPond is program to convert text based muisic score file to sheet music.
+It provides a de-facto standard file format (.ly) thaqt allows for specifying complex music pieces.
+My idea is to use .ly files to play music using FluidSynth.
+I will have to convert my scietific pitch notation (c#3) to Helmholz-like pitch notation (cis') 
+in order to use those files.
+
+Lilypond generates a MIDI file, so that can be used to play the music. 
+There is python-ly project to read the music from .ly files into Python data structures.
+
+05/26/2020
+----------
+Added a simple MIDI file player that is based on mido library.
+  
