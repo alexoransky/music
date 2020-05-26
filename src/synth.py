@@ -40,8 +40,11 @@ class Synth:
         self.fs.setting("synth.gain", FS_GAIN)
 
         self.sfid = self.fs.sfload(str(Path(SOUND_FONT).absolute().resolve()))
-        self.fs.program_select(chan=FS_CHANNEL, sfid=self.sfid, bank=FS_BANK, preset=FS_PRESET)
-        self.fs.cc(chan=FS_CHANNEL, ctrl=FS_CTRL_VOLUME, val=FS_VOLUME)
+        self.setup_channel(channel=FS_CHANNEL)
+
+    def setup_channel(self, channel, bank=FS_BANK, preset=FS_PRESET, ctrl_volume=FS_CTRL_VOLUME, volume=FS_VOLUME):
+        self.fs.program_select(chan=channel, sfid=self.sfid, bank=bank, preset=preset)
+        self.fs.cc(chan=channel, ctrl=ctrl_volume, val=volume)
 
     def stop(self, delay_sec=0):
         if delay_sec > 0:
