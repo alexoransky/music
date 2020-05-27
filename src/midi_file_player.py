@@ -37,7 +37,7 @@ class MIDIFilePlayer:
         self.ports.clear()
 
     def play(self, path: str, max_channel_cnt=1):
-        file = MidiFile(str(Path(path).absolute().resolve()))
+        file = MidiFile(str(Path(path).absolute().resolve()), clip=True)
 
         port_cnt = min(len(file.tracks), max_channel_cnt)
         if port_cnt == 0:
@@ -57,9 +57,11 @@ class MIDIFilePlayer:
         self._close_ports()
         return True
 
-    def print(self, path: str, meta=True, notes=False):
+    @classmethod
+    def print(cls, path: str, meta=True, notes=False):
         file = MidiFile(str(Path(path).absolute().resolve()))
 
+        print(file)
         for i, track in enumerate(file.tracks):
             print('Track {}: {}'.format(i, track.name))
             for msg in track:
