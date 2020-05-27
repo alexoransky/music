@@ -1,4 +1,6 @@
+import time
 from pathlib import Path
+from threading import Thread
 from mido import MidiFile
 from midi_router import MIDIRouter, MIDIPort
 
@@ -7,10 +9,13 @@ class MIDIFilePlayer:
     def __init__(self, synth, port_mask):
         self.synth = synth
         self.port_mask = port_mask
-        self.ports = []
+        self._ports = []
+        self._active = False
+        self._is_playing = False
+        self._thread = None
 
     def _open_ports(self, max_count: int = 0):
-        self.ports.clear()
+        self._ports.clear()
         out_ports = MIDIRouter.available_ports(output=True)
         cnt = 0
         for port_name in out_ports:
@@ -20,7 +25,7 @@ class MIDIFilePlayer:
                 if not port.is_open():
                     return False
 
-                self.ports.append(port)
+                self._ports.append(port)
                 cnt += 1
             if max_count > 0:
                 if cnt >= max_count:
@@ -29,12 +34,15 @@ class MIDIFilePlayer:
         if cnt == 0 or cnt < max_count:
             return False
 
+        if len(self._ports) < 1:
+            return False
+
         return True
 
     def _close_ports(self):
-        for port in self.ports:
+        for port in self._ports:
             port.close()
-        self.ports.clear()
+        self._ports.clear()
 
     def play(self, path: str, max_channel_cnt=1):
         file = MidiFile(str(Path(path).absolute().resolve()), clip=True)
@@ -49,13 +57,34 @@ class MIDIFilePlayer:
         for ch in range(port_cnt):
             self.synth.setup_channel(ch)
 
+        self._thread = Thread(target=self._play, args=(file, port_cnt))
+        self._active = True
+        self._thread.start()
+
+        return True
+
+    def _play(self, file, port_cnt):
+        self._is_playing = True
+
         for msg in file.play():
+            if not self._active:
+                break
+
             if msg.channel >= port_cnt:
                 msg.channel = port_cnt - 1
-            self.ports[msg.channel].send(msg)
+            self._ports[msg.channel].send(msg)
 
+        self._is_playing = False
+
+    def stop(self):
+        self._active = False
+        if self._thread is not None:
+            self._thread.join()
         self._close_ports()
-        return True
+        self._thread = None
+
+    def is_playing(self):
+        return self._is_playing
 
     @classmethod
     def print(cls, path: str, meta=True, notes=False):
@@ -70,6 +99,3 @@ class MIDIFilePlayer:
                     continue
                 if notes and not msg.is_meta:
                     print(msg)
-
-    def stop(self):
-        self._close_ports()

@@ -1,5 +1,6 @@
 import signal
 import sys
+import time
 
 from synth import Synth
 from midi_file_player import MIDIFilePlayer
@@ -13,24 +14,40 @@ else:
 
 
 synth = None
+player = None
 
 
 def signal_handler(sig, frame):
     global synth
 
     print("Shutting down.")
+    player.stop()
     synth.stop()
-    sys.exit(0)
+    try:
+        sys.exit(0)
+    except:
+        pass
 
 
 def main(path: str):
     global synth
+    global player
 
     synth = Synth()
     synth.start()
 
-    file = MIDIFilePlayer(synth, PORT_OUT)
-    return file.play(path)
+    player = MIDIFilePlayer(synth, PORT_OUT)
+    player.print(path)
+    ret = player.play(path)
+
+    i = 0
+    while player.is_playing():
+        time.sleep(1)
+        i += 1
+        if i > 3:
+            player.stop()
+
+    return ret
 
 
 if __name__ == "__main__":
