@@ -28,9 +28,10 @@ class MIDIFilePlayer:
         self._file = None
         self._ports = []
         self._active = False
-        self._is_playing = False
+        self._paused = False
         self._curr_msg_cnt = 0
         self._thread = None
+        self._thread_period_ms = 50
 
     def _open_ports(self, max_count: int = 0):
         self._ports.clear()
@@ -88,11 +89,16 @@ class MIDIFilePlayer:
 
     def _play(self):
         port_cnt = len(self._ports)
-        self._is_playing = True
-
-        for msg in self._file.play():
-            if not self._active:
-                break
+        msgs = self._file.play()
+        while self._active:
+            if self._paused:
+                time.sleep(self._thread_period_ms * 0.001)
+                continue
+            try:
+                msg = next(msgs)
+            except:
+                self._active = False
+                return
 
             if msg.channel >= port_cnt:
                 msg.channel = port_cnt - 1
@@ -100,18 +106,26 @@ class MIDIFilePlayer:
             self._curr_msg_cnt += 1
             self._ports[msg.channel].send(msg)
 
-        self._is_playing = False
-
     def stop(self):
         self._active = False
         if self._thread is not None:
             self._thread.join()
         self._close_ports()
         self._thread = None
+        self._paused = False
         self._curr_msg_cnt = 0
 
+    def pause(self):
+        self._paused = True
+
+    def release(self):
+        self._paused = False
+
     def is_playing(self):
-        return self._is_playing
+        return self._active
+
+    def is_paused(self):
+        return self._paused
 
     def total_msg_cnt(self):
         return self._file.total_msg_cnt
