@@ -5,13 +5,31 @@ from mido import MidiFile
 from midi_router import MIDIRouter, MIDIPort
 
 
+class MIDIFile(MidiFile):
+    def __init__(self, path: str):
+        self.path = str(Path(path).absolute().resolve())
+        super().__init__(self.path, clip=True)
+        self.total_msg_cnt = self._get_total_message_count()
+
+    def _get_total_message_count(self, include_meta=False):
+        cnt = 0
+        for track in self.tracks:
+            for msg in track:
+                if msg.is_meta and not include_meta:
+                    continue
+                cnt += 1
+        return cnt
+
+
 class MIDIFilePlayer:
     def __init__(self, synth, port_mask):
-        self.synth = synth
-        self.port_mask = port_mask
+        self._synth = synth
+        self._port_mask = port_mask
+        self._file = None
         self._ports = []
         self._active = False
         self._is_playing = False
+        self._curr_msg_cnt = 0
         self._thread = None
 
     def _open_ports(self, max_count: int = 0):
@@ -19,7 +37,7 @@ class MIDIFilePlayer:
         out_ports = MIDIRouter.available_ports(output=True)
         cnt = 0
         for port_name in out_ports:
-            if self.port_mask in port_name:
+            if self._port_mask in port_name:
                 port = MIDIPort()
                 port.open(port_name)
                 if not port.is_open():
@@ -44,10 +62,14 @@ class MIDIFilePlayer:
             port.close()
         self._ports.clear()
 
-    def play(self, path: str, max_channel_cnt=1):
-        file = MidiFile(str(Path(path).absolute().resolve()), clip=True)
+    def open(self, path: str):
+        self._file = MIDIFile(path)
 
-        port_cnt = min(len(file.tracks), max_channel_cnt)
+    def close(self):
+        self._file = None
+
+    def start(self, max_channel_cnt=1):
+        port_cnt = min(len(self._file.tracks), max_channel_cnt)
         if port_cnt == 0:
             port_cnt = 1
 
@@ -55,23 +77,27 @@ class MIDIFilePlayer:
             return False
 
         for ch in range(port_cnt):
-            self.synth.setup_channel(ch)
+            self._synth.setup_channel(ch)
 
-        self._thread = Thread(target=self._play, args=(file, port_cnt))
+        self._thread = Thread(target=self._play)
         self._active = True
+        self._curr_msg_cnt = 0
         self._thread.start()
 
         return True
 
-    def _play(self, file, port_cnt):
+    def _play(self):
+        port_cnt = len(self._ports)
         self._is_playing = True
 
-        for msg in file.play():
+        for msg in self._file.play():
             if not self._active:
                 break
 
             if msg.channel >= port_cnt:
                 msg.channel = port_cnt - 1
+
+            self._curr_msg_cnt += 1
             self._ports[msg.channel].send(msg)
 
         self._is_playing = False
@@ -82,9 +108,19 @@ class MIDIFilePlayer:
             self._thread.join()
         self._close_ports()
         self._thread = None
+        self._curr_msg_cnt = 0
 
     def is_playing(self):
         return self._is_playing
+
+    def total_msg_cnt(self):
+        return self._file.total_msg_cnt
+
+    def curr_msg_cnt(self):
+        return self._curr_msg_cnt
+
+    def duration(self):
+        return self._file.length()
 
     @classmethod
     def print(cls, path: str, meta=True, notes=False):
