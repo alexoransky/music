@@ -94,6 +94,7 @@ class MIDIFilePlayer:
             if self._paused:
                 time.sleep(self._thread_period_ms * 0.001)
                 continue
+
             try:
                 msg = next(msgs)
             except:
@@ -115,11 +116,8 @@ class MIDIFilePlayer:
         self._paused = False
         self._curr_msg_cnt = 0
 
-    def pause(self):
-        self._paused = True
-
-    def release(self):
-        self._paused = False
+    def pause(self, pause=True):
+        self._paused = pause
 
     def is_playing(self):
         return self._active

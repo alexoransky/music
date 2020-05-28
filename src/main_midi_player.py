@@ -39,13 +39,20 @@ def main(path: str):
     player = MIDIFilePlayer(synth, PORT_OUT)
     # player.print(path)
     ret = player.open(path)
-    print(player.total_msg_cnt())
 
     i = 0
     ret = player.start()
     while player.is_playing():
         time.sleep(1)
-        print(player.curr_msg_cnt())
+        i += 1
+        if i >= 3:
+            player.pause()
+            break
+
+    time.sleep(3)
+    player.pause(False)
+    while player.is_playing():
+        time.sleep(1)
 
     return ret
 
