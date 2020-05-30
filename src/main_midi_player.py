@@ -3,7 +3,7 @@ import sys
 import time
 
 from synth import Synth
-from midi_file_player import MIDIFilePlayer
+from midi_file_player import MIDIFilePlayer, MIDIFile
 from termcolor import cprint
 
 
@@ -39,7 +39,8 @@ def main(path: str):
     player = MIDIFilePlayer(synth, PORT_OUT)
     # player.print(path)
     ret = player.open(path)
-    print("Length: ", player.length)
+
+    player._file.print()
 
     i = 0
     ret = player.start()

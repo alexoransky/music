@@ -1,4 +1,5 @@
 import time
+import datetime
 from pathlib import Path
 from threading import Thread
 from mido import MidiFile, merge_tracks, tick2second
@@ -7,17 +8,26 @@ from midi_router import MIDIRouter, MIDIPort
 
 THREAD_PERIOD_MS = 50
 DEFAULT_TEMPO = 500000
-TRACE = True
+TRACE = False
 
 
 class MIDIFile(MidiFile):
     def __init__(self, path: str):
-        self.path = str(Path(path).absolute().resolve())
+        self.path = self.absolute_path(path)
         super().__init__(self.path, clip=True)
 
         self.messages = None
-        if self.type < 2:
+
+        # merge tracks for simple playback if the file is not asynchronous
+        if self.type != 2:
             self.messages = merge_tracks(self.tracks)
+
+    def track_count(self, playable_only=True):
+        cnt = 0
+        for track in self.tracks:
+            if self.track_message_count(track, include_meta=not playable_only) > 0:
+                cnt += 1
+        return cnt
 
     def track_message_count(self, track, include_meta=False):
         cnt = 0
@@ -27,11 +37,46 @@ class MIDIFile(MidiFile):
             cnt += 1
         return cnt
 
-    def message_count(self, include_meta=False):
+    def message_count(self, include_meta=False, merged=True):
         cnt = 0
+        if merged:
+            if self.type != 2:
+                cnt += self.track_message_count(self.messages, include_meta=include_meta)
+            return cnt
+
         for track in self.tracks:
             cnt += self.track_message_count(track, include_meta=include_meta)
         return cnt
+
+    @classmethod
+    def absolute_path(cls, path: str):
+        abs_path = str(Path(path).absolute().resolve())
+        return abs_path
+
+    def print_track(self, idx, meta=True, notes=False):
+        track = self.tracks[idx]
+        print('Track {}: {}'.format(idx, track.name))
+        for msg in track:
+            if meta and msg.is_meta:
+                print(msg)
+                continue
+            if notes and not msg.is_meta:
+                print(msg)
+        print()
+
+    def print(self, meta=True, notes=False):
+        if meta:
+            print("File:", self.path)
+            print("Type:", self.type)
+            print("Tracks:", len(self.tracks), "Playable:", self.track_count(playable_only=True))
+            print("Total messages:", self.message_count(include_meta=True, merged=False),
+                  "Merged:", self.message_count(include_meta=True, merged=True),
+                  "Playable:", self.message_count(include_meta=False))
+            print("Total time:", datetime.timedelta(seconds=round(self.length)))
+            print()
+
+        for idx, track in enumerate(self.tracks):
+            self.print_track(idx, meta=meta, notes=notes)
 
 
 class MIDIFilePlayer:
@@ -153,11 +198,7 @@ class MIDIFilePlayer:
         self._total_message_cnt = 0
 
     def start(self, max_channel_cnt=1):
-        port_cnt = 0
-        for track in self._file.tracks:
-            if self._file.track_message_count(track) > 0:
-                port_cnt += 1
-
+        port_cnt = self._file.track_count(playable_only=True)
         if port_cnt < 1:
             return False
 
@@ -261,16 +302,3 @@ class MIDIFilePlayer:
 
         if not paused:
             self.pause(False)
-
-    @classmethod
-    def print(cls, path: str, meta=True, notes=False):
-        file = MidiFile(str(Path(path).absolute().resolve()))
-        print(file)
-        for i, track in enumerate(file.tracks):
-            print('Track {}: {}'.format(i, track.name))
-            for msg in track:
-                if meta and msg.is_meta:
-                    print(msg)
-                    continue
-                if notes and not msg.is_meta:
-                    print(msg)
