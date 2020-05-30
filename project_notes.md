@@ -172,4 +172,12 @@ There is python-ly project to read the music from .ly files into Python data str
 05/26/2020
 ----------
 Added a simple MIDI file player that is based on mido library.
-  
+
+05/30/2020
+----------
+Finished rework of the simple MIDI player- added a thread for playback, ability to pause/release
+the playback, jump to the message or time mark.
+Still need to add a synth channel-MIDI port-file track map.
+As of now, it does not work type 2 (asynchronous) MIDI files.
+I started working on the multi-thread player but that pause/release breaks synchronization
+between threads even for type 1 files.
