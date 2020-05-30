@@ -4,7 +4,8 @@ Project
 The project is to enable MIDI playback and keyboard visualization of
 various music scales.
 
-The project works on macOS Catalina 10.15.4 with Python 3.8.2.
+The project works on macOS Catalina and Linux.
+It is tested with Python 3.8.2 on macOS 10.15.4 and Arch Linux 5.6.14.
 
 
 Dependencies
