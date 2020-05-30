@@ -49,8 +49,9 @@ def main(path: str):
             player.pause()
             break
 
-    time.sleep(3)
+    time.sleep(1)
     player.pause(False)
+    player.curr_msg_idx = 300
     while player.is_active and not player.is_paused:
         time.sleep(1)
 
