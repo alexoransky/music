@@ -42,7 +42,7 @@ def main(path: str):
 
     i = 0
     ret = player.start()
-    while player.is_playing():
+    while player.is_active and not player.is_paused:
         time.sleep(1)
         i += 1
         if i >= 3:
@@ -51,8 +51,10 @@ def main(path: str):
 
     time.sleep(3)
     player.pause(False)
-    while player.is_playing():
+    while player.is_active and not player.is_paused:
         time.sleep(1)
+
+    player.stop()
 
     return ret
 
