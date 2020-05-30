@@ -7,6 +7,7 @@ from midi_router import MIDIRouter, MIDIPort
 
 THREAD_PERIOD_MS = 50
 DEFAULT_TEMPO = 500000
+TRACE = True
 
 
 class MIDIFile(MidiFile):
@@ -40,8 +41,10 @@ class MIDIFilePlayer:
         self._file = None
         self._ports = None
 
+        self._curr_time_mark = 0
         self._curr_message_idx = 0
         self._total_message_cnt = 0
+        self._tempo = DEFAULT_TEMPO
 
         self._active = False
         self._paused = False
@@ -76,9 +79,18 @@ class MIDIFilePlayer:
             port.close()
         self._ports.clear()
 
+    def _time_s(self, msg_idx):
+        delta = 0
+        if 0 <= msg_idx < self._total_message_cnt:
+            ticks = self._file.messages[msg_idx].time
+            if ticks == 0:
+                return 0
+            delta = tick2second(ticks, self._file.ticks_per_beat, self._tempo)
+        return delta
+
     def _play(self):
         port_cnt = len(self._ports)
-        tempo = DEFAULT_TEMPO
+        self._tempo = DEFAULT_TEMPO
         while self._active:
             if self._paused:
                 time.sleep(self._thread_period)
@@ -89,25 +101,48 @@ class MIDIFilePlayer:
                 continue
 
             msg = self._file.messages[self._curr_message_idx]
-            self._curr_message_idx += 1
 
             if msg.type == 'set_tempo':
-                tempo = msg.tempo
+                self._tempo = msg.tempo
 
-            if msg.time > 0:
-                delta = tick2second(msg.time, self._file.ticks_per_beat, tempo)
-                time.sleep(delta)
+            delta = self._time_s(self._curr_message_idx)
+            time.sleep(delta)
+            self._curr_time_mark += delta
+            if TRACE:
+                print(self._curr_message_idx, ": ", self._curr_time_mark, ": ", msg, flush=True)
+            self._curr_message_idx += 1
 
             if msg.is_meta:
                 continue
 
             if msg.channel >= port_cnt:
                 msg.channel = port_cnt - 1
-
             try:
                 self._ports[msg.channel].send(msg)
             except:
                 pass
+
+    def _time_mark_to_msg_index(self, value):
+        self._tempo = DEFAULT_TEMPO
+        mark = 0
+        for idx, msg in enumerate(self._file.messages):
+            if msg.type == 'set_tempo':
+                self._tempo = msg.tempo
+            mark += self._time_s(idx)
+            if mark >= value:
+                return idx
+        return len(self._file.messages)
+
+    def _msg_index_to_time_mark(self, value):
+        self._tempo = DEFAULT_TEMPO
+        mark = 0
+        for idx, msg in enumerate(self._file.messages):
+            if msg.type == 'set_tempo':
+                self._tempo = msg.tempo
+            mark += self._time_s(idx)
+            if value <= idx:
+                return mark
+        return mark
 
     def open(self, path: str):
         self._file = MIDIFile(path)
@@ -160,7 +195,24 @@ class MIDIFilePlayer:
         self._curr_message_idx = 0
 
     def pause(self, pause=True):
-        self._paused = pause
+        def time_s():
+            delta = 0
+            idx = self._curr_message_idx
+            while 0 <= idx < self._total_message_cnt and idx - self._curr_message_idx < 20:
+                delta = self._time_s(idx)
+                if delta > 0:
+                    break
+                idx += 1
+            return delta
+
+        if pause:
+            # finish playing the current note, then pause
+            self._paused = True
+            time.sleep(time_s())
+        else:
+            # move the time mark to the beginning of the note, then release
+            self._curr_time_mark -= self._time_s(self._curr_message_idx)
+            self._paused = False
 
     @property
     def is_active(self):
@@ -180,11 +232,35 @@ class MIDIFilePlayer:
 
     @curr_msg_idx.setter
     def curr_msg_idx(self, value):
+        paused = self._paused
+        if not paused:
+            self.pause(True)
+
+        self._curr_time_mark = self._msg_index_to_time_mark(value)
         self._curr_message_idx = value
 
+        if not paused:
+            self.pause(False)
+
     @property
-    def duration(self):
-        return self._file.length()
+    def length(self):
+        return self._file.length
+
+    @property
+    def time_mark(self):
+        return self._curr_time_mark
+
+    @time_mark.setter
+    def time_mark(self, value):
+        paused = self._paused
+        if not paused:
+            self.pause(True)
+
+        self._curr_message_idx = self._time_mark_to_msg_index(value)
+        self._curr_time_mark = self._msg_index_to_time_mark(self._curr_message_idx)
+
+        if not paused:
+            self.pause(False)
 
     @classmethod
     def print(cls, path: str, meta=True, notes=False):

@@ -39,23 +39,31 @@ def main(path: str):
     player = MIDIFilePlayer(synth, PORT_OUT)
     # player.print(path)
     ret = player.open(path)
+    print("Length: ", player.length)
 
     i = 0
     ret = player.start()
     while player.is_active and not player.is_paused:
         time.sleep(1)
         i += 1
-        if i >= 3:
-            player.pause()
+        if i >= 4:
+            # player.pause()
             break
 
-    time.sleep(1)
-    player.pause(False)
-    player.curr_msg_idx = 300
+    print(player.time_mark, ": ", player.curr_msg_idx)
+
+    # player.curr_msg_idx = 295
+    # print("Jump to: ", player.time_mark, ": ", player.curr_msg_idx)
+
+    player.time_mark = 34.5
+    print("Jump to: ", player.time_mark, ": ", player.curr_msg_idx)
+
+    # player.pause(False)
     while player.is_active and not player.is_paused:
         time.sleep(1)
 
     player.stop()
+    synth.stop()
 
     return ret
 
