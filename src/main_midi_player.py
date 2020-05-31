@@ -43,25 +43,25 @@ def main(path: str):
     player._file.print()
 
     i = 0
-    ret = player.start()
+    ret = player.start(start=0, finish=200)
     while player.is_active and not player.is_paused:
         time.sleep(1)
-        i += 1
-        if i >= 4:
-            # player.pause()
-            break
-
-    # print(player.time_mark, ": ", player.curr_msg_idx)
-
-    player.curr_msg_idx = 296
-    print("Jump to: ", player.time_mark, ": ", player.curr_msg_idx)
-
-    # player.time_mark = 37.5
+    #     i += 1
+    #     if i >= 4:
+    #         # player.pause()
+    #         break
+    #
+    print(player.time_mark, ": ", player.curr_msg_idx)
+    #
+    # player.curr_msg_idx = 296
     # print("Jump to: ", player.time_mark, ": ", player.curr_msg_idx)
-
-    # player.pause(False)
-    while player.is_active and not player.is_paused:
-        time.sleep(1)
+    #
+    # # player.time_mark = 37.5
+    # # print("Jump to: ", player.time_mark, ": ", player.curr_msg_idx)
+    #
+    # # player.pause(False)
+    # while player.is_active and not player.is_paused:
+    #     time.sleep(1)
 
     player.stop()
     synth.stop()

@@ -3,6 +3,7 @@ import datetime
 from bisect import bisect
 from pathlib import Path
 from threading import Thread
+from dataclasses import dataclass
 from mido import MidiFile, merge_tracks, tick2second
 from midi_router import MIDIRouter, MIDIPort
 
@@ -19,6 +20,7 @@ class MIDIFile(MidiFile):
 
         self.messages = None
         self.time_stamps = None
+        self.tempo = DEFAULT_TEMPO
 
         # merge tracks for simple playback if the file is not asynchronous
         if self.type != 2:
@@ -27,12 +29,12 @@ class MIDIFile(MidiFile):
 
     def _time_stamps(self):
         time_stamps = []
-        tempo = DEFAULT_TEMPO
+        self.tempo = DEFAULT_TEMPO
         mark = 0
         for msg in self.messages:
             if msg.type == 'set_tempo':
-                tempo = msg.tempo
-            mark += tick2second(msg.time, self.ticks_per_beat, tempo)
+                self.tempo = msg.tempo
+            mark += tick2second(msg.time, self.ticks_per_beat, self.tempo)
             time_stamps.append(mark)
         return time_stamps
 
@@ -66,10 +68,23 @@ class MIDIFile(MidiFile):
         return bisect(self.time_stamps, mark)
 
     def msg_index_to_time_mark(self, idx):
-        if 0 <= idx < len(self.messages):
+        if 0 <= idx < len(self.time_stamps):
             return self.time_stamps[idx]
         elif idx < 0:
             return self.time_stamps[0]
+        else:
+            return self.time_stamps[-1]
+
+    def next_time_mark(self, idx):
+        if 0 <= idx < len(self.time_stamps):
+            start = self.time_stamps[idx]
+            for i in range(idx, len(self.time_stamps)):
+                mark = self.time_stamps[i]
+                if mark > start:
+                    return mark
+            return self.length
+        elif idx < 0:
+                return self.time_stamps[0]
         else:
             return self.time_stamps[-1]
 
@@ -104,6 +119,16 @@ class MIDIFile(MidiFile):
             self.print_track(idx, meta=meta, notes=notes)
 
 
+@dataclass()
+class Mark:
+    idx: int = 0
+    time: float = 0
+
+    def reset(self):
+        self.idx = 0
+        self.time = 0
+
+
 class MIDIFilePlayer:
     def __init__(self, synth, port_mask):
         self._synth = synth
@@ -111,8 +136,9 @@ class MIDIFilePlayer:
         self._file = None
         self._ports = None
 
-        self._curr_time_mark = 0
-        self._curr_message_idx = 0
+        self._cursor = Mark()
+        self._start = Mark()
+        self._finish = Mark()
         self._total_message_cnt = 0
         self._tempo = DEFAULT_TEMPO
 
@@ -160,27 +186,28 @@ class MIDIFilePlayer:
 
     def _play(self):
         port_cnt = len(self._ports)
-        self._tempo = DEFAULT_TEMPO
+        self._tempo = self._file.tempo
         while self._active:
             if self._paused:
                 time.sleep(self._thread_period)
                 continue
 
-            if self._curr_message_idx >= self._total_message_cnt:
+            if self._cursor.idx >= self._total_message_cnt or \
+               self._cursor.idx >= self._finish.idx:
                 self._paused = True
                 continue
 
-            msg = self._file.messages[self._curr_message_idx]
+            msg = self._file.messages[self._cursor.idx]
 
             if msg.type == 'set_tempo':
                 self._tempo = msg.tempo
 
-            delta = self._time_s(self._curr_message_idx)
+            delta = self._time_s(self._cursor.idx)
             time.sleep(delta)
-            self._curr_time_mark += delta
+            self._cursor.time += delta
             if TRACE:
-                print(self._curr_message_idx, ": ", self._curr_time_mark, ": ", msg, flush=True)
-            self._curr_message_idx += 1
+                print(self._cursor.idx, ": ", self._cursor.time, ": ", msg, flush=True)
+            self._cursor.idx += 1
 
             if msg.is_meta:
                 continue
@@ -194,13 +221,17 @@ class MIDIFilePlayer:
 
     def open(self, path: str):
         self._file = MIDIFile(path)
+        self._tempo = self._file.tempo
 
     def close(self):
         self._file = None
-        self._curr_message_idx = 0
+        self._cursor.reset()
+        self._start.reset()
+        self._finish.reset()
         self._total_message_cnt = 0
+        self._tempo = DEFAULT_TEMPO
 
-    def start(self, max_channel_cnt=1):
+    def start(self, start=None, finish=None, max_channel_cnt=1):
         port_cnt = self._file.track_count(playable_only=True)
         if port_cnt < 1:
             return False
@@ -216,10 +247,24 @@ class MIDIFilePlayer:
         for ch in range(port_cnt):
             self._synth.setup_channel(ch)
 
-        self._curr_message_idx = 0
+        self._paused = True
+
+        self._cursor.reset()
         self._total_message_cnt = len(self._file.messages)
         if self._total_message_cnt == 0:
             return False
+
+        self._start.reset()
+        if start is not None:
+            self._start.idx = start
+            self._start.time = self._file.msg_index_to_time_mark(start)
+            self._cursor = self._start
+
+        self._finish.idx = self._total_message_cnt
+        self._finish.time = self._file.length
+        if finish is not None:
+            self._finish.idx = finish
+            self._finish.time = self._file.next_time_mark(finish)
 
         self._thread = Thread(target=self._play)
         self._active = True
@@ -236,13 +281,15 @@ class MIDIFilePlayer:
         self._close_ports()
         self._thread = None
         self._paused = False
-        self._curr_message_idx = 0
+        self._cursor.reset()
+        self._start.reset()
+        self._finish.reset()
 
     def pause(self, pause=True):
         def time_s():
             delta = 0
-            idx = self._curr_message_idx
-            while 0 <= idx < self._total_message_cnt and idx - self._curr_message_idx < 20:
+            idx = self._cursor.idx
+            while 0 <= idx < self._total_message_cnt and idx - self._cursor.idx < 20:
                 delta = self._time_s(idx)
                 if delta > 0:
                     break
@@ -255,7 +302,7 @@ class MIDIFilePlayer:
             time.sleep(time_s())
         else:
             # move the time mark to the beginning of the note, then release
-            self._curr_time_mark -= self._time_s(self._curr_message_idx)
+            self._cursor.time -= self._time_s(self._cursor.idx)
             self._paused = False
 
     @property
@@ -272,16 +319,16 @@ class MIDIFilePlayer:
 
     @property
     def curr_msg_idx(self):
-        return self._curr_message_idx
+        return self._cursor.idx
 
     @curr_msg_idx.setter
-    def curr_msg_idx(self, value):
+    def curr_msg_idx(self, idx):
         paused = self._paused
         if not paused:
             self.pause(True)
 
-        self._curr_time_mark = self._file.msg_index_to_time_mark(value)
-        self._curr_message_idx = value
+        self._cursor.time = self._file.msg_index_to_time_mark(idx)
+        self._cursor.idx = idx
 
         if not paused:
             self.pause(False)
@@ -292,16 +339,16 @@ class MIDIFilePlayer:
 
     @property
     def time_mark(self):
-        return self._curr_time_mark
+        return self._cursor.time
 
     @time_mark.setter
-    def time_mark(self, value):
+    def time_mark(self, time_s):
         paused = self._paused
         if not paused:
             self.pause(True)
 
-        self._curr_message_idx = self._file.time_mark_to_msg_index(value)
-        self._curr_time_mark = self._file.msg_index_to_time_mark(self._curr_message_idx)
+        self._cursor.idx = self._file.time_mark_to_msg_index(time_s)
+        self._cursor.time = self._file.msg_index_to_time_mark(self._cursor.idx)
 
         if not paused:
             self.pause(False)
