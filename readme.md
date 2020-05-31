@@ -23,32 +23,36 @@ Installation
 2. (macOS only) Install XCode CLT from:
 https://developer.apple.com/download/more/
 
-3. Install FluidSynth
-For installation of FS for Linux, use instructions for apt-get, pacman etc. to
+3. Install FluidSynth:
+
+   For installation of FS for Linux, use instructions for apt-get, pacman etc. to
 install the latest FLuidSynth.
 
-macOS:
+   macOS:
 https://github.com/frescobaldi/frescobaldi/wiki/MIDI-playback-on-Mac-OS-X
 
-Note that PyFluidSynth does not support FluidSynth 2.x as of 4/25/2020:
+   Note that PyFluidSynth does not support FluidSynth 2.x as of 4/25/2020:
 https://github.com/nwhitehead/pyfluidsynth/issues/19
 There are patches created for old FS vs.1.11.1 as well as the new FS 2.x, see details in step 4.
 
-If you choose to install the old FS v1.11.1, 
+   If you choose to install the old FS v1.11.1, 
 instead of 'homebrew install fluid-synth' 
 which installs the latest FS, use:
 brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/34dcd1ff65a56c3191fa57d3dd23e7fffd55fae8/Formula/fluid-synth.rb
 
 4. Install PyFluidSynth (1.2.5) and patch it
-pip3 install pyfluidsynth
-copy the patches/fluidsynthpath.py to where it is installed:
+
+   pip3 install pyfluidsynth
+
+   Copy the patches/fluidsynthpath.py to where it is installed:
 /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/fluidsynth.py
 
 5. Download sound fonts in SF2 format
-Sound fonts are required for the synthesizer and can be found here:
+
+   Sound fonts are required for the synthesizer and can be found here:
 https://musescore.org/en/handbook/soundfonts-and-sfz-files#list
 
-Sound fonts need to be place in data folder.
+   Sound fonts need to be place in data folder.
 
 6. Install mido library to work with MIDI keyboards
 pip install mido
