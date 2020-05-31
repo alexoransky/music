@@ -29,16 +29,20 @@ https://developer.apple.com/download/more/
 install the latest FLuidSynth.
 
    macOS:
-https://github.com/frescobaldi/frescobaldi/wiki/MIDI-playback-on-Mac-OS-X
+   
+   https://github.com/frescobaldi/frescobaldi/wiki/MIDI-playback-on-Mac-OS-X
 
    Note that PyFluidSynth does not support FluidSynth 2.x as of 4/25/2020:
-https://github.com/nwhitehead/pyfluidsynth/issues/19
-There are patches created for old FS vs.1.11.1 as well as the new FS 2.x, see details in step 4.
+   
+   https://github.com/nwhitehead/pyfluidsynth/issues/19
+   
+   There are patches created for old FS vs.1.11.1 as well as the new FS 2.x, see details in step 4.
 
    If you choose to install the old FS v1.11.1, 
 instead of 'homebrew install fluid-synth' 
 which installs the latest FS, use:
-brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/34dcd1ff65a56c3191fa57d3dd23e7fffd55fae8/Formula/fluid-synth.rb
+
+   brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/34dcd1ff65a56c3191fa57d3dd23e7fffd55fae8/Formula/fluid-synth.rb
 
 4. Install PyFluidSynth (1.2.5) and patch it
 
@@ -50,7 +54,7 @@ brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/34dcd1ff65
 5. Download sound fonts in SF2 format
 
    Sound fonts are required for the synthesizer and can be found here:
-https://musescore.org/en/handbook/soundfonts-and-sfz-files#list
+   https://musescore.org/en/handbook/soundfonts-and-sfz-files#list
 
    Sound fonts need to be place in data folder.
 
@@ -84,4 +88,5 @@ Note that main_pygame will work with any synthesizer, it just need to be running
 Other resources
 ---------------
 https://musescore.org/en/handbook/soundfonts-and-sfz-files#list
+
 https://sites.google.com/site/soundfonts4u/
