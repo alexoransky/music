@@ -51,13 +51,13 @@ def main(path: str):
             # player.pause()
             break
 
-    print(player.time_mark, ": ", player.curr_msg_idx)
+    # print(player.time_mark, ": ", player.curr_msg_idx)
 
-    # player.curr_msg_idx = 295
-    # print("Jump to: ", player.time_mark, ": ", player.curr_msg_idx)
-
-    player.time_mark = 34.5
+    player.curr_msg_idx = 296
     print("Jump to: ", player.time_mark, ": ", player.curr_msg_idx)
+
+    # player.time_mark = 37.5
+    # print("Jump to: ", player.time_mark, ": ", player.curr_msg_idx)
 
     # player.pause(False)
     while player.is_active and not player.is_paused:

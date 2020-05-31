@@ -1,5 +1,6 @@
 import time
 import datetime
+from bisect import bisect
 from pathlib import Path
 from threading import Thread
 from mido import MidiFile, merge_tracks, tick2second
@@ -17,10 +18,23 @@ class MIDIFile(MidiFile):
         super().__init__(self.path, clip=True)
 
         self.messages = None
+        self.time_stamps = None
 
         # merge tracks for simple playback if the file is not asynchronous
         if self.type != 2:
             self.messages = merge_tracks(self.tracks)
+            self.time_stamps = self._time_stamps()
+
+    def _time_stamps(self):
+        time_stamps = []
+        tempo = DEFAULT_TEMPO
+        mark = 0
+        for msg in self.messages:
+            if msg.type == 'set_tempo':
+                tempo = msg.tempo
+            mark += tick2second(msg.time, self.ticks_per_beat, tempo)
+            time_stamps.append(mark)
+        return time_stamps
 
     def track_count(self, playable_only=True):
         cnt = 0
@@ -47,6 +61,17 @@ class MIDIFile(MidiFile):
         for track in self.tracks:
             cnt += self.track_message_count(track, include_meta=include_meta)
         return cnt
+
+    def time_mark_to_msg_index(self, mark):
+        return bisect(self.time_stamps, mark)
+
+    def msg_index_to_time_mark(self, idx):
+        if 0 <= idx < len(self.messages):
+            return self.time_stamps[idx]
+        elif idx < 0:
+            return self.time_stamps[0]
+        else:
+            return self.time_stamps[-1]
 
     @classmethod
     def absolute_path(cls, path: str):
@@ -167,28 +192,6 @@ class MIDIFilePlayer:
             except:
                 pass
 
-    def _time_mark_to_msg_index(self, value):
-        self._tempo = DEFAULT_TEMPO
-        mark = 0
-        for idx, msg in enumerate(self._file.messages):
-            if msg.type == 'set_tempo':
-                self._tempo = msg.tempo
-            mark += self._time_s(idx)
-            if mark >= value:
-                return idx
-        return len(self._file.messages)
-
-    def _msg_index_to_time_mark(self, value):
-        self._tempo = DEFAULT_TEMPO
-        mark = 0
-        for idx, msg in enumerate(self._file.messages):
-            if msg.type == 'set_tempo':
-                self._tempo = msg.tempo
-            mark += self._time_s(idx)
-            if value <= idx:
-                return mark
-        return mark
-
     def open(self, path: str):
         self._file = MIDIFile(path)
 
@@ -277,7 +280,7 @@ class MIDIFilePlayer:
         if not paused:
             self.pause(True)
 
-        self._curr_time_mark = self._msg_index_to_time_mark(value)
+        self._curr_time_mark = self._file.msg_index_to_time_mark(value)
         self._curr_message_idx = value
 
         if not paused:
@@ -297,8 +300,8 @@ class MIDIFilePlayer:
         if not paused:
             self.pause(True)
 
-        self._curr_message_idx = self._time_mark_to_msg_index(value)
-        self._curr_time_mark = self._msg_index_to_time_mark(self._curr_message_idx)
+        self._curr_message_idx = self._file.time_mark_to_msg_index(value)
+        self._curr_time_mark = self._file.msg_index_to_time_mark(self._curr_message_idx)
 
         if not paused:
             self.pause(False)
