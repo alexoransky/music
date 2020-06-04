@@ -40,10 +40,12 @@ def main(path: str):
     # player.print(path)
     ret = player.open(path)
 
-    player._file.print()
+    player._file.print(notes=False)
 
     i = 0
-    ret = player.start(start=0, finish=200)
+    # ret = player.start()
+    # ret = player.start(beginning=135, end=183)
+    ret = player.start(beginning=15.0, end=20.0)
     while player.is_active and not player.is_paused:
         time.sleep(1)
     #     i += 1
@@ -51,13 +53,13 @@ def main(path: str):
     #         # player.pause()
     #         break
     #
-    print(player.time_mark, ": ", player.curr_msg_idx)
+    print(player.cursor)
     #
-    # player.curr_msg_idx = 296
-    # print("Jump to: ", player.time_mark, ": ", player.curr_msg_idx)
+    # player.cursor = 296
+    # print("Jump to: ", player.cursor)
     #
-    # # player.time_mark = 37.5
-    # # print("Jump to: ", player.time_mark, ": ", player.curr_msg_idx)
+    # # player.cursor = 37.5
+    # # print("Jump to: ", player.cursor)
     #
     # # player.pause(False)
     # while player.is_active and not player.is_paused:

@@ -181,3 +181,12 @@ Still need to add a synth channel-MIDI port-file track map.
 As of now, it does not work type 2 (asynchronous) MIDI files.
 I started working on the multi-thread player but that pause/release breaks synchronization
 between threads even for type 1 files.
+
+05/31/2020
+----------
+Today, I have added an ability add play a fragment of the file (from any note to any note) 
+to the MIDIFilePlayer.
+
+06/03/2020
+----------
+Reworked the player to use a simple state machine.
