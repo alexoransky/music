@@ -44,9 +44,9 @@ def main(path: str):
 
     i = 0
     # ret = player.start()
-    # ret = player.start(beginning=135, end=183)
+    # ret = player.start(beginning=135, end=182)
     ret = player.start(beginning=15.0, end=20.0)
-    while player.is_active and not player.is_paused:
+    while player.is_playing:
         time.sleep(1)
     #     i += 1
     #     if i >= 4:
@@ -62,7 +62,7 @@ def main(path: str):
     # # print("Jump to: ", player.cursor)
     #
     # # player.pause(False)
-    # while player.is_active and not player.is_paused:
+    # while player.is_playing:
     #     time.sleep(1)
 
     player.stop()

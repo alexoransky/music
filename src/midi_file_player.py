@@ -152,6 +152,9 @@ class MIDIFilePlayer:
             self.idx = 0
             self.time = 0
 
+        def __str__(self):
+            return "[" + str(self.idx) + " " + str(round(self.time, 6)) + "]"
+
     class State:
         STOPPED = 0
         PLAYING = 1
@@ -233,15 +236,14 @@ class MIDIFilePlayer:
                     continue
 
             message = self._file.messages[self._cursor.idx]
-            msg = message.msg
+            if TRACE:
+                print("Read msg:", self._cursor, ":", message, flush=True)
 
             sleep(message.delta_s)
             self._cursor.time += message.delta_s
-
-            if TRACE:
-                print(self._cursor.idx, ": ", self._cursor.time, ": ", message, flush=True)
             self._cursor.idx += 1
 
+            msg = message.msg
             if msg.is_meta:
                 continue
 
@@ -254,6 +256,8 @@ class MIDIFilePlayer:
                         continue
 
                 self._ports[msg.channel].send(msg)
+                if TRACE:
+                    print("Sent msg: ", msg, flush=True)
 
                 if msg.type == "note_on" and msg.velocity > 0:
                     self._curr_notes.add((msg.channel, msg.note))
@@ -348,8 +352,8 @@ class MIDIFilePlayer:
         return self._active
 
     @property
-    def is_paused(self):
-        return self._state != MIDIFilePlayer.State.PLAYING
+    def is_playing(self):
+        return self._state == MIDIFilePlayer.State.PLAYING
 
     @property
     def total_msg_cnt(self):
@@ -381,6 +385,7 @@ class MIDIFilePlayer:
         if state == MIDIFilePlayer.State.PLAYING:
             self._state = MIDIFilePlayer.State.PLAYING
 
+    # TODO: rename to start
     @property
     def beginning(self):
         return self._beginning.idx, self._beginning.time
@@ -391,10 +396,9 @@ class MIDIFilePlayer:
             self._beginning.idx = mark
             self._beginning.time = self._file.msg_index_to_time_mark(mark) - self._time_s(mark)
         elif isinstance(mark, float):
-            self._beginning.idx = self._file.time_mark_to_msg_index(mark)
-            self._beginning.time = self._file.msg_index_to_time_mark(self._beginning.idx)
-
-        print(self._beginning)
+            idx = self._file.time_mark_to_msg_index(mark)
+            self._beginning.idx = idx
+            self._beginning.time = self._file.msg_index_to_time_mark(idx) - self._time_s(idx)
 
     @property
     def end(self):
@@ -416,5 +420,3 @@ class MIDIFilePlayer:
             else:
                 self._end.idx = self._file.time_mark_to_msg_index(mark)
                 self._end.time = self._file.msg_index_to_time_mark(self._end.idx)
-
-        print(self._end)
