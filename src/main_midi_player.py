@@ -44,8 +44,8 @@ def main(path: str):
 
     i = 0
     # ret = player.start()
-    # ret = player.start(beginning=135, end=182)
-    ret = player.start(beginning=15.0, end=20.0)
+    # ret = player.play(start=135, end=182)
+    ret = player.play(start=15.0, end=20.0)
     while player.is_playing:
         time.sleep(1)
     #     i += 1

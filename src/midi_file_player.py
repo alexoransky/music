@@ -168,16 +168,14 @@ class MIDIFilePlayer:
         self._ports = None
 
         self._cursor = MIDIFilePlayer.Mark()
-        self._beginning = MIDIFilePlayer.Mark()
+        self._start = MIDIFilePlayer.Mark()
         self._end = MIDIFilePlayer.Mark()
         self._total_message_cnt = 0
-        self._tempo = DEFAULT_TEMPO
 
         self._active = False
         self._thread = None
         self._thread_period = THREAD_PERIOD_MS * 0.001
         self._state = MIDIFilePlayer.State.STOPPED
-        self._curr_notes = set()
 
     def _open_ports(self, max_count: int = 0):
         """
@@ -207,19 +205,9 @@ class MIDIFilePlayer:
             port.close()
         self._ports.clear()
 
-    def _time_s(self, msg_idx):
-        # TODO: Move to MIDIFile class
-        delta = 0
-        if 0 <= msg_idx < len(self._file.messages):
-            ticks = self._file.messages[msg_idx].msg.time
-            if ticks == 0:
-                return 0
-            delta = tick2second(ticks, self._file.ticks_per_beat, self._tempo)
-        return delta
-
     def _play(self):
         port_cnt = len(self._ports)
-        # self._tempo = self._file.tempo
+        curr_notes = set()
         while self._active:
             if self._state == MIDIFilePlayer.State.PAUSED:
                 sleep(self._thread_period)
@@ -230,8 +218,7 @@ class MIDIFilePlayer:
                 self._state = MIDIFilePlayer.State.PAUSING
 
             if self._state == MIDIFilePlayer.State.PAUSING:
-                if len(self._curr_notes) == 0:
-                    # self._paused = True
+                if len(curr_notes) == 0:
                     self._state = MIDIFilePlayer.State.PAUSED
                     continue
 
@@ -260,26 +247,25 @@ class MIDIFilePlayer:
                     print("Sent msg: ", msg, flush=True)
 
                 if msg.type == "note_on" and msg.velocity > 0:
-                    self._curr_notes.add((msg.channel, msg.note))
+                    curr_notes.add((msg.channel, msg.note))
                 if msg.type == "note_off" or \
                    msg.type == "note_on" and msg.velocity == 0:
-                    self._curr_notes.remove((msg.channel, msg.note))
+                    curr_notes.remove((msg.channel, msg.note))
             except:
                 pass
 
     def open(self, path: str):
         self._file = MIDIFile(path)
-        self._tempo = self._file.tempo
+        self._total_message_cnt = len(self._file.messages)
 
     def close(self):
         self._file = None
         self._cursor.reset()
-        self._beginning.reset()
+        self._start.reset()
         self._end.reset()
         self._total_message_cnt = 0
-        self._tempo = DEFAULT_TEMPO
 
-    def start(self, beginning=None, end=None, max_channel_cnt=1):
+    def play(self, start=None, end=None, max_channel_cnt=1):
         port_cnt = self._file.track_count(playable_only=True)
         if port_cnt < 1:
             return False
@@ -296,18 +282,12 @@ class MIDIFilePlayer:
             self._synth.setup_channel(ch)
 
         self._cursor.reset()
-        self._total_message_cnt = len(self._file.messages)
         if self._total_message_cnt == 0:
             return False
 
-        self._beginning.reset()
-        if beginning is not None:
-            self.beginning = beginning
-            self._cursor = self._beginning
-
-        self.end = self._total_message_cnt
-        if end is not None:
-            self.end = end
+        self.start = start
+        self.end = end
+        self._cursor = self._start
 
         self._thread = Thread(target=self._play)
         self._active = True
@@ -325,18 +305,8 @@ class MIDIFilePlayer:
         self._thread = None
         self._state = MIDIFilePlayer.State.STOPPED
         self._cursor.reset()
-        self._beginning.reset()
+        self._start.reset()
         self._end.reset()
-
-    def _next_time_s(self, start_idx):
-        delta = 0
-        idx = start_idx
-        while 0 <= idx < self._total_message_cnt and idx - start_idx < 20:
-            delta = self._time_s(idx)
-            if delta > 0:
-                break
-            idx += 1
-        return delta
 
     def pause(self, pause=True):
         if pause:
@@ -344,7 +314,7 @@ class MIDIFilePlayer:
             self._state = MIDIFilePlayer.State.PAUSING
         else:
             # move the time mark to the beginning of the note, then release
-            self._cursor.time -= self._time_s(self._cursor.idx)
+            self._cursor.time -= self._file.messages[self._cursor.idx].delta_s
             self._state = MIDIFilePlayer.State.PLAYING
 
     @property
@@ -385,20 +355,25 @@ class MIDIFilePlayer:
         if state == MIDIFilePlayer.State.PLAYING:
             self._state = MIDIFilePlayer.State.PLAYING
 
-    # TODO: rename to start
     @property
-    def beginning(self):
-        return self._beginning.idx, self._beginning.time
+    def start(self):
+        return self._start.idx, self._start.time
 
-    @beginning.setter
-    def beginning(self, mark):
+    @start.setter
+    def start(self, mark):
+        self._start.reset()
+        if mark is None:
+            return
+
         if isinstance(mark, int):
-            self._beginning.idx = mark
-            self._beginning.time = self._file.msg_index_to_time_mark(mark) - self._time_s(mark)
+            idx = mark
         elif isinstance(mark, float):
             idx = self._file.time_mark_to_msg_index(mark)
-            self._beginning.idx = idx
-            self._beginning.time = self._file.msg_index_to_time_mark(idx) - self._time_s(idx)
+        else:
+            return
+
+        self._start.idx = idx
+        self._start.time = self._file.msg_index_to_time_mark(idx) - self._file.messages[idx].delta_s
 
     @property
     def end(self):
@@ -406,17 +381,17 @@ class MIDIFilePlayer:
 
     @end.setter
     def end(self, mark):
+        self._end.idx = self._total_message_cnt
+        self._end.time = self._file.length
+
+        if mark is None:
+            return
+
         if isinstance(mark, int):
-            if mark >= self._total_message_cnt:
-                self._end.idx = self._total_message_cnt
-                self._end.time = self._file.length
-            else:
+            if 0 <= mark < self._total_message_cnt:
                 self._end.idx = mark
                 self._end.time = self._file.msg_index_to_time_mark(mark)
         elif isinstance(mark, float):
-            if mark >= self._file.length:
-                self._end.idx = self._total_message_cnt
-                self._end.time = self._file.length
-            else:
+            if 0 <= mark < self._file.length:
                 self._end.idx = self._file.time_mark_to_msg_index(mark)
                 self._end.time = self._file.msg_index_to_time_mark(self._end.idx)
