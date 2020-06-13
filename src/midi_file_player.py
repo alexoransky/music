@@ -143,7 +143,7 @@ class MIDIFile(MidiFile):
 
 
 class MIDIFilePlayer:
-    @dataclass()
+    @dataclass
     class Mark:
         idx: int = 0
         time: float = 0
@@ -277,9 +277,6 @@ class MIDIFilePlayer:
         self._ports = self._open_ports(port_cnt)
         if len(self._ports) == 0:
             return False
-
-        for ch in range(port_cnt):
-            self._synth.setup_channel(ch)
 
         self._cursor.reset()
         if self._total_message_cnt == 0:

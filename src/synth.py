@@ -1,6 +1,7 @@
 import sys
 import time
 from pathlib import Path
+from dataclasses import dataclass
 import fluidsynth
 
 SOUND_FONT = "data/Nice-Keys-B-Plus-JN1.4.sf2"
@@ -28,9 +29,18 @@ FS_STOP_DELAY_SEC = 1
 
 
 class Synth:
+    @dataclass
+    class Channel:
+        channel: int
+        sound_font: object
+        bank: int
+        preset: int
+        ctrl_volume: int
+        volume: int
+
     def __init__(self):
         self.fs = fluidsynth.Synth()
-        self.sfid = None
+        self.channels = {}
 
     def start(self):
         self.fs.start(driver=FS_DRIVER, midi_driver=FS_MIDI_DRIVER, device=FS_DEVICE)
@@ -39,17 +49,22 @@ class Synth:
         self.fs.setting("audio.period-size", FS_PERIOD_SIZE)
         self.fs.setting("synth.gain", FS_GAIN)
 
-        self.sfid = self.fs.sfload(str(Path(SOUND_FONT).absolute().resolve()))
-        self.setup_channel(channel=FS_CHANNEL)
+        self.setup_channel(FS_CHANNEL, SOUND_FONT)
 
-    def setup_channel(self, channel, bank=FS_BANK, preset=FS_PRESET, ctrl_volume=FS_CTRL_VOLUME, volume=FS_VOLUME):
-        self.fs.program_select(chan=channel, sfid=self.sfid, bank=bank, preset=preset)
+    def setup_channel(self, channel, sound_font_path,
+                      bank=FS_BANK, preset=FS_PRESET, ctrl_volume=FS_CTRL_VOLUME, volume=FS_VOLUME):
+        sound_font = self.fs.sfload(str(Path(sound_font_path).absolute().resolve()))
+        self.fs.program_select(chan=channel, sfid=sound_font, bank=bank, preset=preset)
         self.fs.cc(chan=channel, ctrl=ctrl_volume, val=volume)
+
+        ch = Synth.Channel(channel, sound_font, bank, preset, ctrl_volume, volume)
+        self.channels[channel] = ch
 
     def stop(self, delay_sec=0):
         if delay_sec > 0:
             time.sleep(delay_sec)
         self.fs.delete()
+        self.channels.clear()
 
     def play(self, notes, chord=False, velocity=FS_VELOCITY, wait=FS_LENGTH):
         if chord:

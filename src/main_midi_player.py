@@ -1,10 +1,11 @@
 import signal
 import sys
 import time
+from termcolor import cprint
 
 from synth import Synth
 from midi_file_player import MIDIFilePlayer, MIDIFile
-from termcolor import cprint
+from midi_metronome import MIDIMetronome
 
 
 if sys.platform == "darwin":
@@ -15,13 +16,19 @@ else:
 
 synth = None
 player = None
+metronome = None
+METRONOME = True
+METRONOME_ONLY = False
 
 
 def signal_handler(sig, frame):
     global synth
+    global player
+    global metronome
 
     print("Shutting down.")
     player.stop()
+    metronome.stop()
     synth.stop()
     try:
         sys.exit(0)
@@ -32,40 +39,60 @@ def signal_handler(sig, frame):
 def main(path: str):
     global synth
     global player
+    global metronome
 
     synth = Synth()
     synth.start()
 
     player = MIDIFilePlayer(synth, PORT_OUT)
-    # player.print(path)
-    ret = player.open(path)
+    metronome = MIDIMetronome(synth, PORT_OUT)
 
-    player._file.print(notes=False)
+    if METRONOME_ONLY:
+        metronome.start(210, 5)
+        i = 0
+        while metronome.is_playing:
+            time.sleep(1)
+            i += 1
+            if i >= 8:
+                break
+        metronome.stop()
+        ret = True
+    else:
+        # player.print(path)
+        ret = player.open(path)
 
-    i = 0
-    # ret = player.start()
-    # ret = player.play(start=135, end=182)
-    ret = player.play(start=15.0, end=20.0)
-    while player.is_playing:
-        time.sleep(1)
-    #     i += 1
-    #     if i >= 4:
-    #         # player.pause()
-    #         break
-    #
-    print(player.cursor)
-    #
-    # player.cursor = 296
-    # print("Jump to: ", player.cursor)
-    #
-    # # player.cursor = 37.5
-    # # print("Jump to: ", player.cursor)
-    #
-    # # player.pause(False)
-    # while player.is_playing:
-    #     time.sleep(1)
+        player._file.print(notes=False)
 
-    player.stop()
+        if METRONOME:
+            metronome.velocity = 50
+            metronome.start(210, 5)
+        ret = player.play()
+        # ret = player.play(start=135, end=182)
+        # ret = player.play(start=15.0, end=20.0)
+        i = 0
+        while player.is_playing:
+            time.sleep(1)
+        #     i += 1
+        #     if i >= 4:
+        #         # player.pause()
+        #         break
+        #
+        print(player.cursor)
+        #
+        # player.cursor = 296
+        # print("Jump to: ", player.cursor)
+        #
+        # # player.cursor = 37.5
+        # # print("Jump to: ", player.cursor)
+        #
+        # # player.pause(False)
+        # while player.is_playing:
+        #     time.sleep(1)
+
+        player.stop()
+        if METRONOME:
+            metronome.stop()
+
     synth.stop()
 
     return ret

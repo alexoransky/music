@@ -8,7 +8,7 @@ Here is a list of Python tools for music:
 https://wiki.python.org/moin/PythonInMusic
 
 The project works with SimpleSynth or FluidSynth (preferred).
-Both synths work with Sound Font SF2 intrsument sample files.
+Both synths work with Sound Font SF2 instrument sample files.
 Polyphone tool can be used to edit files:
 https://www.polyphone-soundfonts.com/download
 
@@ -190,3 +190,34 @@ to the MIDIFilePlayer.
 06/03/2020
 ----------
 Reworked the player to use a simple state machine.
+
+06/06/2020
+----------
+Started working on a metronome function.  The metronome click and bell sounds are MIDI notes 33 and 34 and
+defined are in General MIDI Level 2:
+https://soundprogramming.net/file-formats/general-midi-drum-note-numbers/
+It turns out that not many sound fonts actually have those. They are in this sound font made by Rick Simon, 
+in bank 128, preset 0 (127:000) but (128:004) seems to sound better.
+Note that 128:056 with notes 45 and 46 sounds even better. 
+https://musescore.org/en/node/109371
+
+In order to explore and edit sound fonts, I installed Polyphone tool:
+https://www.polyphone-soundfonts.com
+
+06/12/2020
+----------
+After updating alsa-lib to 1.2.3-1, FLuidSynth generates an error:
+ALSA lib dlmisc.c:338:(snd_dlobj_cache_get0) Cannot open shared library libasound_module_pcm_pulse.so (libasound_module_pcm_pulse.so: libasound_module_pcm_pulse.so: cannot open shared object file: No such file or directory)
+fluidsynth: error: Failed to open the "default" audio device
+
+Reverted to alsa-lib 1.2.2-1:
+sudo pacman -U https://archive.archlinux.org/packages/a/alsa-lib/alsa-lib-1.2.2-1-x86_64.pkg.tar.zst
+And also changed /etc/pacman.conf to ignore alsa-lib updates
+IgnorePkg   = alsa-lib
+
+Old versions can be found in:
+https://archive.archlinux.org/packages/a/alsa-lib/
+
+06/13/2020
+----------
+Finished the metronome class. I had to change the synth and the router class a little.
