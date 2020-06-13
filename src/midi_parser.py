@@ -43,7 +43,8 @@ class MIDIParser:
                 print(Chord(n0.name() + chord, n0.octave))
         else:
             for n in note_list:
-                print(Note(midi_number=n).name(octave=True))
+                note = Note(midi_number=n)
+                print(note.name(octave=True), note.number)
 
     def parse(self, message):
         """
