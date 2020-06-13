@@ -10,11 +10,16 @@ from termcolor import cprint
 
 
 PORT_IN = "Arturia"
-
 if sys.platform == "darwin":
     PORT_OUT = "FluidSynth"
 else:
     PORT_OUT = "FLUID Synth"
+
+# Alternative sound font, bank and preset
+SOUND_FONT = "data/OmegaGMGS2.sf2"
+SF_BANK = 128
+SF_PRESET = 56
+#SF_PRESET = 4
 
 
 synth = None
@@ -78,6 +83,7 @@ def main():
 
     synth = Synth()
     synth.start()
+    synth.setup_channel(channel=0, sound_font_path=SOUND_FONT, bank=SF_BANK, preset=SF_PRESET)
 
     if not init_midi_router():
         return False
