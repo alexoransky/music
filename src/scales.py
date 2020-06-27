@@ -22,6 +22,7 @@ class HeptatonicScale(Scale):
     }
 
     def __init__(self, root_note: str, mode: str = "", octave=4):
+        super().__init__()
         self.root = Note(name=root_note, octave=octave)
         if mode.lower() == "major" or mode == "":
             mode = "ionian"
@@ -29,6 +30,7 @@ class HeptatonicScale(Scale):
             mode = "aeolian"
         self.mode = self._validate_mode(mode)
         self.notes = self._scale()
+        self.note_cnt = 7
 
     @staticmethod
     def type():

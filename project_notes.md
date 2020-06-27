@@ -33,6 +33,53 @@ http://www.fluidsynth.org
 APIs:
 http://www.fluidsynth.org/api/index.html
 
+FLuidSynth starts with many warning messages on Arch Linux.  However, it does not seem to affect anything.
+Here is the command to use ALSA:
+  fluidsynth -is -a alsa -m alsa_seq -r 48000 /usr/share/soundfonts/FluidR3_GM.sf2
+  
+ALSA lib pcm_dsnoop.c:641:(snd_pcm_dsnoop_open) unable to open slave
+ALSA lib pcm_dmix.c:1089:(snd_pcm_dmix_open) unable to open slave
+ALSA lib pcm.c:2642:(snd_pcm_open_noupdate) Unknown PCM cards.pcm.rear
+ALSA lib pcm.c:2642:(snd_pcm_open_noupdate) Unknown PCM cards.pcm.center_lfe
+ALSA lib pcm.c:2642:(snd_pcm_open_noupdate) Unknown PCM cards.pcm.side
+connect(2) call to /dev/shm/jack-1000/default/jack_0 failed (err=No such file or directory)
+attempt to connect to server failed
+connect(2) call to /dev/shm/jack-1000/default/jack_0 failed (err=No such file or directory)
+attempt to connect to server failed
+ALSA lib pcm_oss.c:377:(_snd_pcm_oss_open) Unknown field port
+ALSA lib pcm_oss.c:377:(_snd_pcm_oss_open) Unknown field port
+ALSA lib pcm_usb_stream.c:486:(_snd_pcm_usb_stream_open) Invalid type for card
+ALSA lib pcm_usb_stream.c:486:(_snd_pcm_usb_stream_open) Invalid type for card
+ALSA lib pcm_dmix.c:1089:(snd_pcm_dmix_open) unable to open slave
+connect(2) call to /dev/shm/jack-1000/default/jack_0 failed (err=No such file or directory)
+attempt to connect to server failed
+FluidSynth runtime version 2.1.3
+Copyright (C) 2000-2020 Peter Hanappe and others.
+Distributed under the LGPL license.
+SoundFont(R) is a registered trademark of E-mu Systems, Inc.
+fluidsynth: warning: Failed to set thread to high priority
+fluidsynth: warning: Failed to set thread to high priority 
+
+Sometimes an update to alsa-lib breaks the FS imterface, refer to notes from 06/13/2020 on how to fix the issue.
+
+FluidSynth opens the following MIDI ports:
+ 'FLUID Synth (40619):Synth input port (40619:0) 128:0'
+ 'FLUID Synth (40619):Synth input port (40619:1) 128:1'
+ 'FLUID Synth (40619):Synth input port (40619:10) 128:10'
+ 'FLUID Synth (40619):Synth input port (40619:11) 128:11'
+ 'FLUID Synth (40619):Synth input port (40619:12) 128:12'
+ 'FLUID Synth (40619):Synth input port (40619:13) 128:13'
+ 'FLUID Synth (40619):Synth input port (40619:14) 128:14'
+ 'FLUID Synth (40619):Synth input port (40619:15) 128:15'
+ 'FLUID Synth (40619):Synth input port (40619:2) 128:2'
+ 'FLUID Synth (40619):Synth input port (40619:3) 128:3'
+ 'FLUID Synth (40619):Synth input port (40619:4) 128:4'
+ 'FLUID Synth (40619):Synth input port (40619:5) 128:5'
+ 'FLUID Synth (40619):Synth input port (40619:6) 128:6'
+ 'FLUID Synth (40619):Synth input port (40619:7) 128:7'
+ 'FLUID Synth (40619):Synth input port (40619:8) 128:8'
+ 'FLUID Synth (40619):Synth input port (40619:9) 128:9'
+
 Lilypond
 --------
 Lilypond is the software that allows to store music in text-based files instead of sheets.
