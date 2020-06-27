@@ -119,7 +119,8 @@ fluidsynth -o midi.driver=coremidi -o audio.driver=coreaudio -o audio.coreaudio.
 We will be using PyFLuidSynth for a Python API wrapper.
 https://github.com/nwhitehead/pyfluidsynth
 It turns that it is for Python 2, so I patched it. Copy the patches/fluidsynthpath.py to where it is installed:
-/Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/fluidsynth.py
+(macOS): /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/fluidsynth.py
+(Linux): /usr/lib/python3.8/site-packages/fluidsynth.py
 
 Install osascript
 This is needed to control output volume in macOS. FS outputs some noise when the destructor is called.
@@ -268,3 +269,14 @@ https://archive.archlinux.org/packages/a/alsa-lib/
 06/13/2020
 ----------
 Finished the metronome class. I had to change the synth and the router class a little.
+
+06/27/2020
+----------
+Started exploring just tuning and tuning to 432 Hz (Verdi's A).
+FluidSynth allows changes in tuning but it does it as offset in cents from 440 Hz standard.
+
+Conversion from Hz to cents and back:
+http://www.sengpielaudio.com/calculator-centsratio.htm
+See Frequency to musical note converter
+
+I have added Tuning class to be able to change A from 440 Hz to any other number.

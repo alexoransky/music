@@ -21,8 +21,6 @@ class Note:
         "flat": "♭",
         "b": "♭"}
 
-    A_FREQ_HZ = 440
-
     def __init__(self, name: str = "", octave: int = 4, midi_number: int = None, suggested_root: str = None):
         """
         create a not from name/octave or the MIDI number
@@ -41,6 +39,8 @@ class Note:
         # range is 0.. Note that 0..127 is a valid NoteOn MIDI number, 128.. - extended part
         self.number = None
         self.octave = None
+
+        self.note_a_freq_hz = 440
 
         if midi_number is not None:
             self._create_from_midi(midi_number, suggested_root)
@@ -61,8 +61,11 @@ class Note:
             if self.name()[0] != suggested_root:
                 self.use_other_name(suggested_root)
 
+    def set_note_a_freq(self, freq_hz):
+        self.note_a_freq_hz = freq_hz
+
     def freq_hz(self):
-        return self.A_FREQ_HZ * math.pow(2, (self.number-69)/12)
+        return self.note_a_freq_hz * math.pow(2, (self.number-69)/12)
 
     def name(self, octave=False):
         ret = self.names[self._name_idx]

@@ -6,6 +6,7 @@ from termcolor import cprint
 from synth import Synth
 from midi_file_player import MIDIFilePlayer, MIDIFile
 from midi_metronome import MIDIMetronome
+from tuning import Tuning
 
 
 if sys.platform == "darwin":
@@ -43,6 +44,7 @@ def main(path: str):
 
     synth = Synth()
     synth.start()
+    synth.tune(0, 432)
 
     player = MIDIFilePlayer(synth, PORT_OUT)
     metronome = MIDIMetronome(synth, PORT_OUT)

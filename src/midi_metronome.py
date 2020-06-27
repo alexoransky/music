@@ -115,6 +115,7 @@ class MIDIMetronome:
         self._state = MIDIMetronome.State.STOPPED
 
     def pause(self, pause=True):
+        # TODO: set the next note to BELL when the metronome is released
         if pause:
             self._state = MIDIMetronome.State.PAUSED
         else:

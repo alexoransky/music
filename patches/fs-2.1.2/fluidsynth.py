@@ -167,6 +167,35 @@ fluid_synth_write_s16 = cfunc('fluid_synth_write_s16', c_void_p,
                               ('roff', c_int, 1),
                               ('rincr', c_int, 1))
 
+# tuning
+fluid_synth_activate_key_tuning = cfunc('fluid_synth_activate_key_tuning', c_int,
+                                        ('synth', c_void_p, 1),
+                                        ('bank', c_int, 1),
+                                        ('prog', c_int, 1),
+                                        ('name', c_char_p, 1),
+                                        ('pitch', POINTER(c_double), 1),
+                                        ('apply', c_int, 1))
+
+fluid_synth_activate_octave_tuning = cfunc('fluid_synth_activate_octave_tuning', c_int,
+                                           ('synth', c_void_p, 1),
+                                           ('bank', c_int, 1),
+                                           ('prog', c_int, 1),
+                                           ('name', c_char_p, 1),
+                                           ('pitch', POINTER(c_double), 1),
+                                           ('apply', c_int, 1))
+
+fluid_synth_activate_tuning = cfunc('fluid_synth_activate_tuning', c_int,
+                                    ('synth', c_void_p, 1),
+                                    ('chan', c_int, 1),
+                                    ('bank', c_int, 1),
+                                    ('prog', c_int, 1),
+                                    ('apply', c_int, 1))
+
+fluid_synth_deactivate_tuning = cfunc('fluid_synth_deactivate_tuning', c_int,
+                                      ('synth', c_void_p, 1),
+                                      ('chan', c_int, 1),
+                                      ('apply', c_int, 1))
+
 
 class fluid_synth_channel_info_t(Structure):
     _fields_ = [
@@ -178,12 +207,36 @@ class fluid_synth_channel_info_t(Structure):
         ('reserved', c_char*32)]
 
 
+#
+# fluid_synth_get_channel_info = cfunc('fluid_synth_get_channel_info', c_int,
+#                                      ('synth', c_void_p, 1),
+#                                      ('chan', c_int, 1),
+#                                      ('info', POINTER(fluid_synth_channel_info_t), 1))
+
+
 fluid_synth_get_program = cfunc('fluid_synth_get_program', c_int,
                                 ('synth', c_void_p, 1),
                                 ('chan', c_int, 1),
                                 ('sfont_id', POINTER(c_int), 1),
                                 ('bank_num', POINTER(c_int), 1),
                                 ('preset_num', POINTER(c_int), 1))
+
+# fluid_synth_set_reverb_full = cfunc('fluid_synth_set_reverb_full', c_int,
+#                                     ('synth', c_void_p, 1),
+#                                     ('set', c_int, 1),
+#                                     ('roomsize', c_double, 1),
+#                                     ('damping', c_double, 1),
+#                                     ('width', c_double, 1),
+#                                     ('level', c_double, 1))
+
+# fluid_synth_set_chorus_full = cfunc('fluid_synth_set_chorus_full', c_int,
+#                                     ('synth', c_void_p, 1),
+#                                     ('set', c_int, 1),
+#                                     ('nr', c_int, 1),
+#                                     ('level', c_double, 1),
+#                                     ('speed', c_double, 1),
+#                                     ('depth_ms', c_double, 1),
+#                                     ('type', c_int, 1))
 
 fluid_synth_get_reverb_roomsize = cfunc('fluid_synth_get_reverb_roomsize', c_double,
                                         ('synth', c_void_p, 1))
@@ -204,9 +257,18 @@ fluid_synth_get_chorus_nr = cfunc('fluid_synth_get_chorus_nr', c_int,
 fluid_synth_get_chorus_level = cfunc('fluid_synth_get_chorus_level', c_double,
                                      ('synth', c_void_p, 1))
 
+# fluid_synth_get_chorus_speed_Hz = cfunc('fluid_synth_get_chorus_speed_Hz', c_double,
+#                                         ('synth', c_void_p, 1))
+
+# fluid_synth_get_chorus_depth_ms = cfunc('fluid_synth_get_chorus_depth_ms', c_double,
+#                                         ('synth', c_void_p, 1))
+
 fluid_synth_get_chorus_type = cfunc('fluid_synth_get_chorus_type', c_int,
                                     ('synth', c_void_p, 1))
 
+# fluid_synth_set_midi_router = cfunc('fluid_synth_set_midi_router', None,
+#                                     ('synth', c_void_p, 1),
+#                                     ('router', c_void_p, 1))
 
 # fluid midi router rule
 class fluid_cmd_handler_t(Structure):
@@ -475,6 +537,12 @@ class Synth:
         """Select a program"""
         return fluid_synth_program_select(self.synth, chan, sfid, bank, preset)
 
+    # def channel_info(self, chan):
+    #     """get soundfont, bank, prog, preset name of channel"""
+    #     info = fluid_synth_channel_info_t()
+    #     fluid_synth_get_channel_info(self.synth, chan, byref(info))
+    #     return info.sfont_id, info.bank, info.program, info.name
+
     def router_clear(self):
         if self.router is not None:
             fluid_midi_router_clear_rules(self.router)
@@ -522,6 +590,45 @@ class Synth:
         if self.router is not None:
             fluid_midi_router_rule_set_param2(self.router.cmd_rule, min, max, mul, add)
 
+    def set_reverb(self, roomsize=-1.0, damping=-1.0, width=-1.0, level=-1.0):
+        """
+        roomsize Reverb room size value (0.0-1.2)
+        damping Reverb damping value (0.0-1.0)
+        width Reverb width value (0.0-100.0)
+        level Reverb level value (0.0-1.0)
+        """
+        set = 0
+        if roomsize >= 0:
+            set += 0b0001
+        if damping >= 0:
+            set += 0b0010
+        if width >= 0:
+            set += 0b0100
+        if level >= 0:
+            set += 0b1000
+        return fluid_synth_set_reverb_full(self.synth, set, roomsize, damping, width, level)
+
+    def set_chorus(self, nr=-1, level=-1.0, speed=-1.0, depth=-1.0, type=-1):
+        """
+        nr Chorus voice count (0-99, CPU time consumption proportional to this value)
+        level Chorus level (0.0-10.0)
+        speed Chorus speed in Hz (0.29-5.0)
+        depth_ms Chorus depth (max value depends on synth sample rate, 0.0-21.0 is safe for sample rate values up to 96KHz)
+        type Chorus waveform type (0=sine, 1=triangle)
+        """
+        set = 0
+        if nr >= 0:
+            set += 0b00001
+        if level >= 0:
+            set += 0b00010
+        if speed >= 0:
+            set += 0b00100
+        if depth >= 0:
+            set += 0b01000
+        if type >= 0:
+            set += 0b10000
+        return fluid_synth_set_chorus_full(self.synth, set, nr, level, speed, depth, type)
+
     def get_reverb_roomsize(self):
         return fluid_synth_get_reverb_roomsize(self.synth)
 
@@ -539,6 +646,12 @@ class Synth:
 
     def get_chorus_level(self):
         return fluid_synth_get_reverb_level(self.synth)
+
+    def get_chorus_speed(self):
+        return fluid_synth_get_chorus_speed_Hz(self.synth)
+
+    def get_chorus_depth(self):
+        return fluid_synth_get_chorus_depth_ms(self.synth)
 
     def get_chorus_type(self):
         return fluid_synth_get_chorus_type(self.synth)
@@ -622,6 +735,28 @@ class Synth:
 
         """
         return fluid_synth_write_s16_stereo(self.synth, len)
+
+    def activate_key_tuning(self, bank, prog, name, pitch_arr, apply):
+        arr = (c_double * 128)(*range(128))
+        for idx in range(128):
+            arr[idx] = 0.0
+        for idx, p in enumerate(pitch_arr):
+            arr[idx] = p
+        fluid_synth_activate_tuning(self.synth, bank, prog, name.encode(), arr, apply)
+
+    def activate_octave_tuning(self, bank, prog, name, pitch_arr, apply):
+        arr = (c_double * 12)(*range(12))
+        for idx in range(12):
+            arr[idx] = 0.0
+        for idx, p in enumerate(pitch_arr):
+            arr[idx] = p
+        fluid_synth_activate_octave_tuning(self.synth, bank, prog, name.encode(), arr, apply)
+
+    def activate_tuning(self, channel, bank, prog, apply):
+        fluid_synth_activate_tuning(self.synth, channel, bank, prog, apply)
+
+    def deactivate_tuning(self, channel, apply):
+        fluid_synth_activate_tuning(self.synth, channel, apply)
 
 
 class Sequencer:

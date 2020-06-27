@@ -3,6 +3,7 @@ import time
 from pathlib import Path
 from dataclasses import dataclass
 import fluidsynth
+from tuning import Tuning
 
 SOUND_FONT = "data/Nice-Keys-B-Plus-JN1.4.sf2"
 
@@ -79,3 +80,12 @@ class Synth:
             self.fs.noteon(0, note.number, velocity)
             time.sleep(wait)
             self.fs.noteoff(0, note.number)
+
+    def tune(self, channel, note_a_freq_hz=440, tuning=None):
+        if tuning is None:
+            tuning = Tuning(note_a_freq_hz)
+            self.fs.activate_octave_tuning(0, 0, tuning.name, tuning.octave_offsets, 0)
+        else:
+            self.fs.activate_key_tuning(0, 0, tuning.name, tuning.pitch_arr, 0)
+
+        self.fs.activate_tuning(channel, 0, 0, 1)

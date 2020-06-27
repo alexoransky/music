@@ -49,7 +49,8 @@ which installs the latest FS, use:
    pip3 install pyfluidsynth
 
    Copy the patches/fluidsynthpath.py to where it is installed:
-/Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/fluidsynth.py
+(macOS): /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/fluidsynth.py
+(Linux): /usr/lib/python3.8/site-packages/fluidsynth.py
 
 5. Download sound fonts in SF2 format
 
