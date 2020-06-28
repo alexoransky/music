@@ -279,4 +279,34 @@ Conversion from Hz to cents and back:
 http://www.sengpielaudio.com/calculator-centsratio.htm
 See Frequency to musical note converter
 
-I have added Tuning class to be able to change A from 440 Hz to any other number.
+I have added Tuning class to be able to change A from 440 Hz to any other number and started working on
+just intonation.  I have added 5-limit tuning.
+
+Just intonation: building a 12-note scale for 5-limit tuning:
+https://en.wikipedia.org/wiki/Five-limit_tuning
+
+Intervals are calculator with a factor:
+F = 3^x x 5^y x 2^z
+Where x, y znd z are defined in the following grid (z is a function of x and y, x = [-2, 2], y = [-1, 1]):
+    -2  -1  0   1   2
+1   1   0   -2  -3  -5
+0   4   2   0   -1  -3
+-1  6   4   3   1   0
+
+Interval is then calculated using the following formula:
+I = 1200 x log2(F)
+
+This generates the following table:
+    -2  -1  0   1    2
+1   182 884 386 1088 590
+0   996 498 0   702  204
+1   610 112 814 316  1018
+
+Every note in column -2 is enharmonic to a note in column 2 (eg 610 and 590).
+Then only 12 notes has to be selected from the 15 defined by the table.
+Note at (-2, -1) with interval of 610 is removed first.  Then two other notes
+are removed, thus, with the removal of 610, 3 scales can be generated:
+1. 610, 182, 1018
+2. 610, 996, 204
+3. 610, 996, 182
+

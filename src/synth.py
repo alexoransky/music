@@ -82,10 +82,10 @@ class Synth:
             self.fs.noteoff(0, note.number)
 
     def tune(self, channel, note_a_freq_hz=440, tuning=None):
-        if tuning is None:
-            tuning = Tuning(note_a_freq_hz)
-            self.fs.activate_octave_tuning(0, 0, tuning.name, tuning.octave_offsets, 0)
-        else:
-            self.fs.activate_key_tuning(0, 0, tuning.name, tuning.pitch_arr, 0)
+        tuning = Tuning(note_a_freq_hz, tuning)
+        self.fs.activate_octave_tuning(0, 0, tuning.name, tuning.offsets, 0)
+        # if tuning is None:
+        # else:
+        #     self.fs.activate_key_tuning(0, 0, tuning.name, tuning.pitch_arr, 0)
 
         self.fs.activate_tuning(channel, 0, 0, 1)

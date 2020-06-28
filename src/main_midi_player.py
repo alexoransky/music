@@ -18,7 +18,7 @@ else:
 synth = None
 player = None
 metronome = None
-METRONOME = True
+METRONOME = False
 METRONOME_ONLY = False
 
 
@@ -44,7 +44,8 @@ def main(path: str):
 
     synth = Synth()
     synth.start()
-    synth.tune(0, 432)
+    synth.tune(0, 432, tuning=Tuning.TUNING_5_LIMIT)
+    # synth.tune(0, 440)
 
     player = MIDIFilePlayer(synth, PORT_OUT)
     metronome = MIDIMetronome(synth, PORT_OUT)
