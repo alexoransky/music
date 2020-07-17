@@ -2,12 +2,12 @@ import signal
 import sys
 
 from pprint import pprint
+from termcolor import cprint
 
 from synth import Synth
 from midi_router import MIDIRouter
 from midi_parser import MIDIParser
-from termcolor import cprint
-
+from tuning import Tuning
 
 PORT_IN = "Arturia"
 if sys.platform == "darwin":
@@ -55,7 +55,7 @@ def init_midi_router():
             port_out = port
             break
 
-    midi_router = MIDIRouter(port_in=port_in, port_out=port_out)
+    midi_router = MIDIRouter(port_in=port_in, port_out=port_out, message_filter=["aftertouch"])
     return midi_router.start()
 
 
@@ -83,7 +83,9 @@ def main():
 
     synth = Synth()
     synth.start()
-    synth.setup_channel(channel=0, sound_font_path=SOUND_FONT, bank=SF_BANK, preset=SF_PRESET)
+    synth.tune(0, 432, tuning=Tuning.TUNING_5_LIMIT)
+    # alternative sound font
+    # synth.setup_channel(channel=0, sound_font_path=SOUND_FONT, bank=SF_BANK, preset=SF_PRESET)
 
     if not init_midi_router():
         return False

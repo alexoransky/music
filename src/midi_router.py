@@ -10,9 +10,11 @@ MAX_MESSAGE_QUEUE_SIZE = 100
 
 
 class MIDIPort:
-    def __init__(self, name: str = None, port=None):
+    def __init__(self, name: str = None, port=None, message_filter=None):
         self.name = name
         self.port = port
+        self.filter = None
+        self.set_filter(message_filter)
 
     def open(self, port_name, output=True, callback=None):
         self.close()
@@ -50,10 +52,28 @@ class MIDIPort:
         if self.port is None:
             return
 
+        if self.filter is not None:
+            if message.type in self.filter:
+                return
+
         try:
             self.port.send(message)
         except:
             pass
+
+    def set_filter(self, message_filter=None):
+        """
+        Deines the filter for send()
+        :param message_filter: a list of Mido Message types, ex "aftertouch"
+        :return:
+        """
+        if message_filter is None:
+            self.filter = None
+            return
+
+        self.filter = []
+        for msg in message_filter:
+            self.filter.append(msg)
 
     def is_open(self):
         return self.port is not None
@@ -66,9 +86,9 @@ class MIDIPort:
 
 
 class MIDIRouter:
-    def __init__(self, port_in: str = None, port_out: str = None):
+    def __init__(self, port_in: str = None, port_out: str = None, message_filter=None):
         self.port_in = MIDIPort()
-        self.port_out = MIDIPort()
+        self.port_out = MIDIPort(message_filter=message_filter)
 
         self.enabled = False
         self.messages = Queue(maxsize=MAX_MESSAGE_QUEUE_SIZE)

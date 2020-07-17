@@ -10,7 +10,7 @@ from midi_router import MIDIRouter, MIDIPort
 
 THREAD_PERIOD_MS = 50
 DEFAULT_TEMPO = 500000
-TRACE = True
+TRACE = False
 
 
 class MIDIMessage:
