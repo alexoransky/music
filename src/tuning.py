@@ -32,7 +32,6 @@ class Tuning:
             for i in range(12):
                 self.offsets[i] += (intervals[i] - 100*i)
 
-
     def intervals_5_limit(self, num=0):
         """
         See the method to build 12 tone scales for 5-limit tuningL
@@ -47,6 +46,4 @@ class Tuning:
 
         intervals = [1200*math.log2(i) for i in scale[num]]
         intervals.sort()
-        from pprint import pprint
-        pprint(intervals)
         return intervals

@@ -1,0 +1,38 @@
+# This is the configuration file for the Digital Keyboard
+
+# Main window GUI settings
+main_window:
+  log_font: "Consolas"   # Set to "" for default
+  fixed_size: true
+  auto_shrink_to_screen: true
+  min_width: 1200
+  min_height: 800
+  # Only when fixed_size is set to true:
+  width: 1600   # 1600
+  height: 800   # 1000
+  # Only when auto_shrink_to_screen is set to true:
+  margin_x: 4
+  margin_y: 4
+
+#
+# All other settings are organized by tabs.
+#
+# IMPORTANT: Tab objects in this config must be named "xxx_tab", for example, "status_tab".
+#            We use "_tab" to iterate though them.
+#
+# Each tab has a "visible" field that defines if it will be displayed or not.
+# Also, each tab has a timer, the value is defined in ms.  This timer is for UI update.
+# Finally, each tab can have one or more "keys" (like "status_key").
+# Those are JSON objects that the tab receives from the MFR app.
+#
+
+keyboard_tab:
+  visible: true
+  timer: 1000
+  start_note: A
+  key_count: 88
+  show_labels: false
+
+settings_tab:
+  visible: true
+  timer: 0

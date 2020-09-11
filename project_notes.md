@@ -310,3 +310,9 @@ are removed, thus, with the removal of 610, 3 scales can be generated:
 2. 610, 996, 204
 3. 610, 996, 182
 
+09/05/2020
+
+Started working on the UI again.  Investigated urwid BarGraph widget to create a terminal view.
+Also, found this project that uses Qt5:
+https://github.com/killalea/digital-keyboard
+It seems to be the most promising.

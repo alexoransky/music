@@ -2,7 +2,7 @@ import math
 from num2words import num2words
 
 
-class DiatonicInterval:
+class Interval:
     SEMITONE_CNT = {"P1": 0,
                     "d2": 0,
                     "m2": 1,
@@ -16,7 +16,7 @@ class DiatonicInterval:
                     "P4": 5,
                     "A3": 5,
                     "d5": 6,
-                    "A4": 5,
+                    "A4": 6,
                     "P5": 7,
                     "d6": 7,
                     "m6": 8,
@@ -33,10 +33,6 @@ class DiatonicInterval:
                     "S": 1}
 
     def __init__(self, name):
-        """
-        Creates a diatonic interval from the given name
-        :param name: P1, m2, M2, P4, d3, A5 etc
-        """
         self.name = None
         self.semitone_cnt = None
         self.pitch_ratio = None
@@ -57,15 +53,6 @@ class DiatonicInterval:
             return name
         return None
 
-    def _semitone_cnt(self):
-        return self.SEMITONE_CNT.get(self.name, None)
-
-    def _pitch_ratio(self):
-        return math.pow(2, self.semitone_cnt/12)
-
-    def _cent_cnt(self):
-        return self.semitone_cnt * 100
-
     def _quality(self):
         if self.name[0] == "m":
             return "minor"
@@ -84,7 +71,21 @@ class DiatonicInterval:
 
         return ""
 
+    def _semitone_cnt(self):
+        return self.SEMITONE_CNT.get(self.name, None)
+
+    def _pitch_ratio(self):
+        return 1, 1
+
+    def _cent_cnt(self):
+        return 0
+
     def _number(self, short_ordinal=True):
+        """
+        Returns unqualified interval name, e.g. 2nd, 4th, fifth, based on the semitone count constant
+        :param short_ordinal: If True, returns shorter ordinal, otherwise, full
+        :return: unqualified interval name, e.g. 2nd, 4th, fifth, based on the semitone count constant
+        """
         def ordinal(n):
             suffix = "tsnrhtdd"[(n / 10 % 10 != 1) * (n % 10 < 4) * n % 10::4]
             return f"{n}{suffix}"
@@ -116,6 +117,36 @@ class DiatonicInterval:
             return 2
 
         return int(self.name[1])
+
+
+class DiatonicInterval(Interval):
+    def __init__(self, name):
+        """
+        Creates a diatonic interval from the given name
+        :param name: P1, m2, M2, P4, d3, A5 etc
+        """
+        super().__init__(name)
+
+    def _pitch_ratio(self):
+        return math.pow(2, self.semitone_cnt/12), 1
+
+    def _cent_cnt(self):
+        return self.semitone_cnt * 100
+
+
+class JustInterval(Interval):
+    def __init__(self, name):
+        """
+        Creates a just interval from the given name
+        :param name: P1, m2, M2, P4, d3, A5 etc
+        """
+        super().__init__(name)
+
+    def _pitch_ratio(self):
+        return math.pow(2, self.semitone_cnt/12), 1
+
+    def _cent_cnt(self):
+        return self.semitone_cnt * 100
 
 
 if __name__ == "__main__":
