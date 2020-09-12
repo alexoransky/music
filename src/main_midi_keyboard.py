@@ -40,8 +40,11 @@ def init_midi_router():
     global midi_router
 
     # find input and output MIDI ports
-    in_ports = MIDIRouter.available_ports(output=False)
-    out_ports = MIDIRouter.available_ports(output=True)
+    try:
+        in_ports = MIDIRouter.available_ports(output=False)
+        out_ports = MIDIRouter.available_ports(output=True)
+    except:
+        return False
 
     port_in = None
     port_out = None
@@ -106,4 +109,4 @@ if __name__ == "__main__":
     cprint("Press Ctrl+C to stop.", "yellow")
 
     if not main():
-        cprint("Cannot find the required ports. Exiting.", "red")
+        cprint("Cannot find the required MIDI ports. Exiting.", "red")

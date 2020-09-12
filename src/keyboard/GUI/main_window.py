@@ -12,6 +12,8 @@ from utils import screen_size, window_size
 from tabs.tab_keyboard import Keyboard
 from tabs.tab_settings import Settings
 
+from audio import AudioSupport
+
 TOOL_TITLE = "Digital Keyboard"
 TOOL_VER = "1.0"
 CONFIG_FILE = "config.yml"
@@ -68,6 +70,11 @@ class MainWindow(QMainWindow):
 
         # initialize the main window and all tabs
         self.init_ui()
+
+        # start MIDI
+        self.audio = AudioSupport()
+        if not self.audio.start_midi(self.config.main_window.port_in, self.config.main_window.port_out):
+            self.log("Cannot start MIDI")
 
     def _set_size(self):
         cw = self.config.main_window.width
@@ -145,5 +152,6 @@ class MainWindow(QMainWindow):
 
     def on_close(self):
         print("Closing the main window")
+        self.audio.stop_midi()
         for tab in self.tabs:
             tab.on_close()

@@ -316,3 +316,10 @@ Started working on the UI again.  Investigated urwid BarGraph widget to create a
 Also, found this project that uses Qt5:
 https://github.com/killalea/digital-keyboard
 It seems to be the most promising.
+
+09/11/2020
+
+Added a tabbed GUI app that displays a keyboard.
+The project that I found (digital keybaord) was inspirational, I learned how the scene and labels can be used.
+
+  

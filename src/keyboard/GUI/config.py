@@ -34,6 +34,8 @@ class Config:
         height: int = 800
         min_width: int = 800
         min_height: int = 600
+        port_in: str = "Arturia"
+        port_out: str = "FLUID Synth"
 
     @dataclass
     class KeyboardTab(Loadable):
