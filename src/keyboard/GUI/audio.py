@@ -7,7 +7,9 @@ from tuning import Tuning
 
 
 class AudioSupport:
-    def __init__(self):
+    def __init__(self, enable_print=False):
+        self.enable_print = enable_print
+
         self.sf = None
         self.midi_in = None
         self.midi_out = None
@@ -75,7 +77,7 @@ class AudioSupport:
         self.synth.stop()
 
     def _parse_midi_events(self):
-        self.parser = MIDIParser()
+        self.parser = MIDIParser(enable_print=self.enable_print)
 
         while self.is_active:
             self.parser.parse(self.midi_router.get_message())

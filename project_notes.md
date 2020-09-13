@@ -321,5 +321,10 @@ It seems to be the most promising.
 
 Added a tabbed GUI app that displays a keyboard.
 The project that I found (digital keybaord) was inspirational, I learned how the scene and labels can be used.
+Everything else had to be rewritten.
+
+9/12/2020
+
+Collected all common MIDI and Synth tasks in the AudioSupport class.
 
   

@@ -26,24 +26,25 @@ class Loadable:
 class Config:
     @dataclass
     class MainWindow(Loadable):
-        fixed_size: bool = False
+        fixed_size: bool = True
         auto_shrink_to_screen: bool = True
         margin_x: int = 0
         margin_y: int = 0
-        width: int = 1000
+        width: int = 1600
         height: int = 800
         min_width: int = 800
         min_height: int = 600
-        port_in: str = "Arturia"
-        port_out: str = "FLUID Synth"
 
     @dataclass
     class KeyboardTab(Loadable):
         visible: bool = True
         timer: int = 1000
-        start_note: str = "C"
-        key_count: int = 88
-        show_labels: bool = False
+        start_note: str = "A"  # "F"
+        key_count: int = 88    # 34
+        show_labels: bool = True
+        # MIDI
+        port_in: str = "Arturia"
+        port_out: str = "FLUID Synth"
 
     @dataclass
     class SettingsTab(Loadable):

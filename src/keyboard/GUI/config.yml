@@ -15,18 +15,6 @@ main_window:
   margin_x: 4
   margin_y: 4
 
-  # MIDI
-  port_in: "Arturia"
-  port_out: "FLUID Synth"  # for darwin (macOS): "FluidSynth"
-
-  # FluidSynth
-# Alternative sound font, bank and preset
-#SOUND_FONT = "data/OmegaGMGS2.sf2"
-#SF_BANK = 128
-#SF_PRESET = 56
-#SF_PRESET = 4
-
-
 #
 # All other settings are organized by tabs.
 #
@@ -45,6 +33,17 @@ keyboard_tab:
   start_note: A
   key_count: 88
   show_labels: false
+
+  # MIDI
+  port_in: "Arturia"
+  port_out: "FLUID Synth"  # for darwin (macOS): "FluidSynth"
+
+  # FluidSynth
+# Alternative sound font, bank and preset
+#SOUND_FONT = "data/OmegaGMGS2.sf2"
+#SF_BANK = 128
+#SF_PRESET = 56
+#SF_PRESET = 4
 
 settings_tab:
   visible: true

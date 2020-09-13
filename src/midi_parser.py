@@ -29,9 +29,11 @@ class MIDINote:
 
 
 class MIDIParser:
-    def __init__(self):
+    def __init__(self, enable_print=True):
+        self.print = enable_print
         self.chords = Chord.semitones_to_chords()
         self.notes = set()
+        self.note_fn = None
 
     def print_notes(self):
         note_list = sorted(list(self.notes))
@@ -46,6 +48,9 @@ class MIDIParser:
                 note = Note(midi_number=n)
                 print(note.name(octave=True), note.number)
 
+    def set_note_on_off_fn(self, note_fn):
+        self.note_fn = note_fn
+
     def parse(self, message):
         """
         :param message:
@@ -59,8 +64,13 @@ class MIDIParser:
         n = re.search(NOTE_ON_RE, msg)
         if n is not None:
             # note = MIDINote(int(n.group(CHANNEL)), int(n.group(NOTE)), int(n.group(VELOCITY)))
-            self.notes.add(int(n.group(NOTE)))
-            self.print_notes()
+            note_num = int(n.group(NOTE))
+            self.notes.add(note_num)
+            if self.print:
+                self.print_notes()
+
+            if self.note_fn is not None:
+                self.note_fn(note_num, True)
             return
 
         if len(self.notes) == 0:
@@ -69,7 +79,10 @@ class MIDIParser:
         n = re.search(NOTE_OFF_RE, msg)
         if n is not None:
             # note = MIDINote(int(n.group(CHANNEL)), int(n.group(NOTE)), int(n.group(VELOCITY)))
-            self.notes.remove(int(n.group(NOTE)))
+            note_num = int(n.group(NOTE))
+            self.notes.remove(note_num)
+            if self.note_fn is not None:
+                self.note_fn(note_num, False)
             return
 
     def semitones(self, notes):

@@ -9,10 +9,10 @@ class Settings(Tab):
         self.height = 100
 
     def init_ui(self):
-        self.log("init_ui()")
+       pass
 
     def update_ui(self):
-        self.log("settings tab: update_ui")
+        pass
 
     def resize_widgets(self):
         # # stack tables one on top of another
@@ -26,4 +26,4 @@ class Settings(Tab):
         return w, h
 
     def cleanup_ui(self):
-        self.log("settings tab: cleanup_ui")
+        pass

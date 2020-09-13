@@ -1,7 +1,8 @@
 from PyQt5.QtCore import Qt, QRect
 from PyQt5.QtWidgets import QWidget, QGraphicsRectItem, QGraphicsTextItem, QGraphicsScene, QGraphicsView
 from tab import Tab
-# from kbd_widgets import KeyboardWidget
+from audio import AudioSupport
+
 
 KEYS = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"]
 WHITE_KEYS = ["A", "B", "C", "D", "E", "F", "G"]
@@ -27,8 +28,17 @@ class Keyboard(Tab):
         self.ui = ui
         self.tab = tab
         self.config = config
+        self.log = log_fn
 
         self.keyboard_widget = KeyboardWidget(config.key_count, config.start_note, config.show_labels, parent=ui.widget_keyboard)
+
+        # start MIDI
+        self.audio = AudioSupport()
+        self.audio_started = self.audio.start_midi(config.port_in, config.port_out)
+        if self.audio_started:
+            self.audio.parser.set_note_on_off_fn(self.note_fn)
+        else:
+            self.log("Cannot start MIDI")
 
     def init_ui(self):
         self.resize_widgets()
@@ -51,6 +61,13 @@ class Keyboard(Tab):
 
     def cleanup_ui(self):
         self.log("keyboard tab: cleanup_ui")
+
+    def note_fn(self, note, is_on):
+        self.keyboard_widget.update_key(note, is_on)
+
+    def on_close(self):
+        self.audio.stop_midi()
+        super().on_close()
 
 
 class KeyboardWidget(QGraphicsView):
@@ -94,6 +111,9 @@ class KeyboardWidget(QGraphicsView):
                 scene.addItem(key.label)
         self.setScene(scene)
 
+        # sort the keys by the key index
+        self.keys.sort(key=lambda k: k.idx)
+
         self.update_ui()
 
     def update_ui(self):
@@ -110,7 +130,7 @@ class KeyboardWidget(QGraphicsView):
 
     def _idx_to_note(self, idx):
         start_idx = 0
-        for k, i in enumerate(KEYS):
+        for i, k in enumerate(KEYS):
             if k == self.start_note:
                 start_idx = i
 
@@ -203,6 +223,18 @@ class KeyboardWidget(QGraphicsView):
                 key = KeyWidget(rect, idx, note)
                 self.keys.append(key)
 
+    def _midi_note_to_idx(self, midi_note):
+        if self.key_cnt == 88:
+            return midi_note - 21
+
+    def update_key(self, midi_note, is_pressed):
+        if is_pressed:
+            self.keys[self._midi_note_to_idx(midi_note)].press()
+        else:
+            self.keys[self._midi_note_to_idx(midi_note)].release()
+
+        self.update_ui()
+
 
 class KeyWidget(QGraphicsRectItem):
     def __init__(self, rect: QRect, idx: int, note: str):
@@ -227,3 +259,11 @@ class KeyWidget(QGraphicsRectItem):
             self.label.setPlainText(note)
             self.label.setPos(self.rect.x() + self.rect.width() / 2 - self.label.boundingRect().width() / 2,
                               self.rect.y() + self.rect.height() * 0.8)
+
+    def press(self):
+        self.setBrush(Qt.gray)
+
+    def release(self):
+        self.setBrush(Qt.black)
+        if self.note in WHITE_KEYS:
+            self.setBrush(Qt.white)
