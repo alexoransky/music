@@ -39,7 +39,7 @@ class Config:
     class KeyboardTab(Loadable):
         visible: bool = True
         timer: int = 100
-        start_note: str = "A"  # "F"
+        start_note: str = "A0"  # "F2"
         key_count: int = 88    # 34
         show_labels: bool = True
         # MIDI

@@ -70,7 +70,12 @@ class Note:
     def name(self, octave=False):
         ret = self.names[self._name_idx]
         if octave:
-            ret += chr(SUBSCRIPT_0 + self.octave)
+            if self.octave > -1:
+                octave_chr = chr(SUBSCRIPT_0 + self.octave)
+            else:
+                # -1
+                octave_chr = chr(SUBSCRIPT_0 + 11) + chr(SUBSCRIPT_0 + abs(self.octave))
+            ret += octave_chr
         return ret
 
     def use_other_name(self, suggested_root=None):
@@ -83,6 +88,24 @@ class Note:
         self._name_idx += 1
         if self._name_idx > len(self.names):
             self._name_idx = 0
+
+    @classmethod
+    def midi_number_to_note_name(cls, midi_number):
+        # returns note name with no flats (C4, C♯4 and so on)
+        name = tet12.number_to_note(midi_number % 12)[0]
+        octave = midi_number//12 - 1
+        if octave > -1:
+            octave_chr = chr(SUBSCRIPT_0 + octave)
+        else:
+            # -1
+            octave_chr = chr(SUBSCRIPT_0 + 11) + chr(SUBSCRIPT_0 + abs(octave))
+        return name + octave_chr
+
+    @classmethod
+    def note_name_to_midi_number(cls, note_name):
+        octave = note_name[-1:]
+        name = cls.validate_name(note_name[:-1])
+        return (int(octave) + 1) * 12 + tet12.note_to_number(name)
 
     @classmethod
     def validate_name(cls, name):

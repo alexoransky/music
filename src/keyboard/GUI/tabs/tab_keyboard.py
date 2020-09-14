@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QWidget, QGraphicsRectItem, QGraphicsTextItem, QGrap
 from tab import Tab
 from audio import AudioSupport
 from chords import Chord
+from notes import Note
 
 
 KEYS = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"]
@@ -88,9 +89,13 @@ class KeyboardWidget(QGraphicsView):
 
         self.widget = parent
         self.key_area = None
+
         self.keys = []
         self.key_cnt = key_count
         self.start_note = start_note
+        idx = Note.note_name_to_midi_number(start_note)
+        self.midi_range = (idx, idx+key_count-1)
+
         self.show_labels = show_labels
 
         self.white_key_width = 0
@@ -143,7 +148,7 @@ class KeyboardWidget(QGraphicsView):
     def _idx_to_note(self, idx):
         start_idx = 0
         for i, k in enumerate(KEYS):
-            if k == self.start_note:
+            if k == self.start_note[0]:  # skip the octave
                 start_idx = i
 
         i = (start_idx + idx) % len(KEYS)
@@ -210,7 +215,7 @@ class KeyboardWidget(QGraphicsView):
 
         # create black keys
         i = 0
-        last_note = self.start_note
+        last_note = self.start_note[0]  # skip the octave
         last_x = 0
         for idx in range(self.key_cnt):
             note = self._idx_to_note(idx)
@@ -236,14 +241,23 @@ class KeyboardWidget(QGraphicsView):
                 self.keys.append(key)
 
     def _midi_note_to_idx(self, midi_note):
-        if self.key_cnt == 88:
-            return midi_note - 21
+        return midi_note - self.midi_range[0]
 
     def update_key(self, midi_note, is_pressed):
+        out_of_range = False
+        idx = self._midi_note_to_idx(midi_note)
+        # TODO: in case of chords outside of the piano range, need to shift up or down the entire chord (pressed keys)
+        while idx < 0:
+            idx += 12
+            out_of_range = True
+        while idx > self.key_cnt-1:
+            idx -= 12
+            out_of_range = True
+
         if is_pressed:
-            self.keys[self._midi_note_to_idx(midi_note)].press()
+            self.keys[idx].press(out_of_range)
         else:
-            self.keys[self._midi_note_to_idx(midi_note)].release()
+            self.keys[idx].release()
 
         self.update_ui()
 
@@ -257,8 +271,6 @@ class KeyWidget(QGraphicsRectItem):
         self.note = note
         self.label = None
 
-        self.setBrush(Qt.black)
-
         if note in WHITE_KEYS:
             self.setBrush(Qt.white)
             # set the label
@@ -271,11 +283,17 @@ class KeyWidget(QGraphicsRectItem):
             self.label.setPlainText(note)
             self.label.setPos(self.rect.x() + self.rect.width() / 2 - self.label.boundingRect().width() / 2,
                               self.rect.y() + self.rect.height() * 0.8)
+        else:
+            self.setBrush(Qt.black)
 
-    def press(self):
-        self.setBrush(Qt.gray)
+    def press(self, out_of_range=False):
+        if out_of_range:
+            self.setBrush(Qt.yellow)
+        else:
+            self.setBrush(Qt.gray)
 
     def release(self):
-        self.setBrush(Qt.black)
         if self.note in WHITE_KEYS:
             self.setBrush(Qt.white)
+        else:
+            self.setBrush(Qt.black)

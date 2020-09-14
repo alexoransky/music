@@ -30,7 +30,7 @@ main_window:
 keyboard_tab:
   visible: true
   timer: 1000
-  start_note: A
+  start_note: A0
   key_count: 88
   show_labels: false
 
