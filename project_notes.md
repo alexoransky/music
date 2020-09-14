@@ -327,4 +327,9 @@ Everything else had to be rewritten.
 
 Collected all common MIDI and Synth tasks in the AudioSupport class.
 
+9/13/2020
+Note that "Cannot mix incompatible Qt library" when running Qt Assistant or qt5ct tool or other Qt tools due to the inconsuistent update in Qt libs.
+In my case it was an update from Qt 5.15.0 to 5.15.1.  
+This is resolved by updating qt5-styleplugins, although it might take a few days.
+
   

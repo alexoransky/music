@@ -1,7 +1,9 @@
+from copy import copy
 from PyQt5.QtCore import Qt, QRect
 from PyQt5.QtWidgets import QWidget, QGraphicsRectItem, QGraphicsTextItem, QGraphicsScene, QGraphicsView
 from tab import Tab
 from audio import AudioSupport
+from chords import Chord
 
 
 KEYS = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"]
@@ -23,12 +25,13 @@ BW_RATIO = NORM_BLACK_KEY_WIDTH / NORM_WHITE_KEY_WIDTH
 
 class Keyboard(Tab):
     def __init__(self, ui, tab, config, log_fn=print):
-        super().__init__(ui, tab, config, enable_timer=False, log_fn=log_fn)
+        super().__init__(ui, tab, config, enable_timer=True, log_fn=log_fn)
 
         self.ui = ui
         self.tab = tab
         self.config = config
         self.log = log_fn
+        self.notes = set()
 
         self.keyboard_widget = KeyboardWidget(config.key_count, config.start_note, config.show_labels, parent=ui.widget_keyboard)
 
@@ -44,7 +47,15 @@ class Keyboard(Tab):
         self.resize_widgets()
 
     def update_ui(self):
-        pass
+        notes, chord = self.audio.parser.get_notes(self.notes)
+        notes_str = ""
+        chord_str = ""
+        if len(notes):
+            notes_str = " ".join([note.name(octave=True) for note in notes])
+            if chord is not None:
+                ch = Chord(notes[0].name() + chord, notes[0].octave)
+                notes_str += "  =  " + str(ch.name())
+        self.ui.label_notes.setText(notes_str)
 
     def resize_widgets(self):
         w = self.ui.scrollArea_keyboard.width()
@@ -63,6 +74,7 @@ class Keyboard(Tab):
         self.log("keyboard tab: cleanup_ui")
 
     def note_fn(self, note, is_on):
+        self.notes = copy(self.audio.parser.notes)
         self.keyboard_widget.update_key(note, is_on)
 
     def on_close(self):

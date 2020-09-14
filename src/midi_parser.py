@@ -35,18 +35,24 @@ class MIDIParser:
         self.notes = set()
         self.note_fn = None
 
-    def print_notes(self):
-        note_list = sorted(list(self.notes))
-        if len(note_list) >= 3:
-            st = self.semitones(note_list)
+    def get_notes(self, midi_notes_set):
+        midi_notes = sorted(list(midi_notes_set))
+        notes = []
+        chord = None
+        for n in midi_notes:
+            note = Note(midi_number=n)
+            notes.append(note)
+        if len(midi_notes) >= 3:
+            st = self.semitones(midi_notes)
             chord = self.chords.get(st, None)
-            n0 = Note(midi_number=note_list[0])
-            if chord is not None:
-                print(Chord(n0.name() + chord, n0.octave))
-        else:
-            for n in note_list:
-                note = Note(midi_number=n)
-                print(note.name(octave=True), note.number)
+        return notes, chord
+
+    def print_notes(self):
+        notes, chord = self.get_notes(self.notes)
+        if chord is not None:
+            print(Chord(notes[0].name() + chord, notes[0].octave))
+        for note in notes:
+            print(note.name(octave=True), note.number)
 
     def set_note_on_off_fn(self, note_fn):
         self.note_fn = note_fn
@@ -85,7 +91,8 @@ class MIDIParser:
                 self.note_fn(note_num, False)
             return
 
-    def semitones(self, notes):
+    @classmethod
+    def semitones(cls, notes):
         if len(notes) < 3:
             return None
 

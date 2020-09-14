@@ -73,6 +73,27 @@
             </rect>
            </property>
           </widget>
+          <widget class="QLabel" name="label_notes">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>344</y>
+             <width>221</width>
+             <height>41</height>
+            </rect>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>16</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>C</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
          </widget>
         </widget>
        </widget>

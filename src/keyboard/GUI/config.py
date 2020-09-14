@@ -38,7 +38,7 @@ class Config:
     @dataclass
     class KeyboardTab(Loadable):
         visible: bool = True
-        timer: int = 1000
+        timer: int = 100
         start_note: str = "A"  # "F"
         key_count: int = 88    # 34
         show_labels: bool = True
