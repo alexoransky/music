@@ -26,7 +26,7 @@ https://developer.apple.com/download/more/
 3. Install FluidSynth:
 
    For installation of FS for Linux, use instructions for apt-get, pacman etc. to
-install the latest FLuidSynth.
+install the latest FluidSynth.
 
    macOS:
    
@@ -44,13 +44,23 @@ which installs the latest FS, use:
 
    brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/34dcd1ff65a56c3191fa57d3dd23e7fffd55fae8/Formula/fluid-synth.rb
 
-4. Install PyFluidSynth (1.2.5) and patch it
+4. Install PyFluidSynth (1.2.5 and so on) and patch it
 
-   pip3 install pyfluidsynth
+   pip install pyfluidsynth
+
+   pyfluidsynth requires patching because it lacks tuning functions.
 
    Copy the patches/fluidsynthpath.py to where it is installed:
-(macOS): /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/fluidsynth.py
-(Linux): /usr/lib/python3.8/site-packages/fluidsynth.py
+
+   (macOS): /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/fluidsynth.py
+   
+   (Linux): 
+   /usr/lib/python3.8/site-packages/fluidsynth.py
+   or
+   ~/.local/lib/python3.8/site-packages/fluidsynth.py
+
+   Refer to FluidSynth APIs for patching the later versions:
+   http://www.fluidsynth.org/api/index.html
 
 5. Download sound fonts in SF2 format
 
@@ -60,15 +70,20 @@ which installs the latest FS, use:
    Sound fonts need to be place in data folder.
 
 6. Install mido library to work with MIDI keyboards
-pip install mido
-pip install python-rtmidi
+
+   pip install mido
+
+   pip install python-rtmidi
 
 7. Install termcolor, num2words and other Python APIs as necessary
+
 
 SimpleSynth Installation
 ------------------------
 
-The project will work fine with SympleSynth but the sound will be inferior to the FLuidSynth's.
+(macOS only)
+
+The project will work fine with SympleSynth but the sound will be inferior to the FluidSynth's.
 SimpleSynth requires PyGame.midi library to output sound.
 SimpleSynth was tried on macOS only.
 
@@ -76,14 +91,14 @@ SimpleSynth was tried on macOS only.
 brew install sdl sdl2 sdl_image sdl_mixer sdl_ttf portmidi
 
 2. Install pygame
-pip3 install pygame
+pip install pygame
 
 3. Install SimpleSynth, see instructions:
 https://notahat.com/simplesynth/
 
 4. Use main_pygame as an example.
 Leave SympleSynth running while you run Python scripts.
-Note that main_pygame will work with any synthesizer, it just need to be running.
+Note that main_pygame will work with any synthesizer, it just needs to be running.
 
 
 Other resources

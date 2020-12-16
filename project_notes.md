@@ -334,3 +334,26 @@ This is resolved by updating qt5-styleplugins, although it might take a few days
 
 For the project, added display of notes and chords that are being played.
   
+
+12/14/2020
+
+Got back to the project after a long break- was busy at work. Also, had to reinstall the system.
+Anyway, slowly started recalling where I left the project a few months back.
+
+
+12/15/2020
+
+One of the ideas is to put together a chords tool that would:
+- display the notes that the entered chord has
+- play the chord
+- display the chord on the guitar neck
+- display the chord on the piano keyboard
+
+The first two items are already implemented in the main.py module.
+
+pyfluidsynth was updated to 1.3.0 and needed to be patched again.
+
+
+12/16/2020
+
+The next step is to set up Qt 5 and PyQt 5 again.
