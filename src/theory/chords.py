@@ -1,5 +1,5 @@
-from notes import Note
-from intervals import DiatonicInterval
+from theory.notes import Note
+from theory.intervals import DiatonicInterval
 
 
 class Chord:

@@ -1,7 +1,7 @@
 import pygame.midi
 import time
 from termcolor import cprint
-from scales import HeptatonicScale
+from theory.scales import HeptatonicScale
 
 DEVICE = 0
 INSTRUMENT = 1  # http://www.ccarh.org/courses/253/handout/gminstruments/

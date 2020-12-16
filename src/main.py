@@ -1,7 +1,6 @@
 from termcolor import cprint
-from scales import HeptatonicScale
-from chords import Chord
-from synth import Synth
+from theory.chords import Chord
+from audio.synth import Synth
 
 
 def play_notes(synth, notes, chord=False):

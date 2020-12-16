@@ -5,7 +5,7 @@ from pathlib import Path
 from threading import Thread
 from dataclasses import dataclass
 from mido import MidiFile, merge_tracks, tick2second, Message
-from midi_router import MIDIRouter, MIDIPort
+from audio.midi_router import MIDIRouter, MIDIPort
 
 
 THREAD_PERIOD_MS = 50

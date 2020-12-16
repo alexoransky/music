@@ -1,7 +1,7 @@
 import math
-from intervals import DiatonicInterval
-from temperaments import TET12
-from validate_utils import validate_int
+from theory.intervals import DiatonicInterval
+from theory.temperaments import TET12
+from theory.validate_utils import validate_int
 
 tet12 = TET12()
 SUBSCRIPT_0 = 8320

@@ -3,9 +3,9 @@ import time
 from pathlib import Path
 from dataclasses import dataclass
 import fluidsynth
-from tuning import Tuning
+from audio.tuning import Tuning
 
-SOUND_FONT = "data/Nice-Keys-B-Plus-JN1.4.sf2"
+SOUND_FONT = "../data/Nice-Keys-B-Plus-JN1.4.sf2"
 
 if sys.platform == "darwin":
     FS_DRIVER = "coreaudio"

@@ -3,10 +3,10 @@ import sys
 import time
 from termcolor import cprint
 
-from synth import Synth
-from midi_file_player import MIDIFilePlayer, MIDIFile
-from midi_metronome import MIDIMetronome
-from tuning import Tuning
+from audio.synth import Synth
+from midi_file_player import MIDIFilePlayer
+from audio.midi_metronome import MIDIMetronome
+from audio.tuning import Tuning
 
 
 if sys.platform == "darwin":

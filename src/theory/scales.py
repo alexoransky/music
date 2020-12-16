@@ -1,4 +1,4 @@
-from notes import Note
+from theory.notes import Note
 
 
 class Scale:
