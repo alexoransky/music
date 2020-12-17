@@ -4,10 +4,7 @@ import sys
 from pprint import pprint
 from termcolor import cprint
 
-from audio.synth import Synth
-from audio.midi_router import MIDIRouter
-from midi_parser import MIDIParser
-from audio.tuning import Tuning
+from audio import Synth, MIDIRouter, MIDIParser, Tuning
 
 PORT_IN = "Arturia"
 if sys.platform == "darwin":

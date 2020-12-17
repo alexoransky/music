@@ -1,9 +1,9 @@
 from threading import Thread
 
-from synth import Synth
-from midi_router import MIDIRouter
-from midi_parser import MIDIParser
-from tuning import Tuning
+from .synth import Synth
+from .midi_router import MIDIRouter
+from .midi_parser import MIDIParser
+from .tuning import Tuning
 
 
 class AudioSupport:

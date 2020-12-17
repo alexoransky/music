@@ -1,7 +1,8 @@
 from time import sleep
 from threading import Thread
 from mido import Message
-from audio.midi_router import MIDIRouter, MIDIPort
+
+from .midi_router import MIDIRouter, MIDIPort
 
 
 THREAD_PERIOD_MS = 50

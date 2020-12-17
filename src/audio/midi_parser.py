@@ -1,8 +1,8 @@
 import re
 from dataclasses import dataclass
 
-from theory.chords import Chord
-from theory.notes import Note
+from theory import Chord
+from theory import Note
 
 
 CHANNEL = "channel"

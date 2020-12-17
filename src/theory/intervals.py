@@ -147,9 +147,3 @@ class JustInterval(Interval):
 
     def _cent_cnt(self):
         return self.semitone_cnt * 100
-
-
-if __name__ == "__main__":
-    for name in DiatonicInterval.SEMITONE_CNT.keys():
-        i = DiatonicInterval(name)
-        print(f"{i.full_name()}: semitones: {i.semitone_cnt} pitch ratio: {i.pitch_ratio}")
