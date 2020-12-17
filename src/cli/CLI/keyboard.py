@@ -2,7 +2,7 @@ import urwid
 
 import time
 
-from CLI.kbd_graphic import KeyboardWidget
+from cli.CLI.kbd_graphic import KeyboardWidget
 
 
 UPDATE_INTERVAL = 0.2

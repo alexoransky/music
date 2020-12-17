@@ -1,20 +1,14 @@
-import sys
-import traceback
 from dataclasses import dataclass
 from typing import Callable
 
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QMainWindow, QPushButton, QWidget, QTabWidget, QVBoxLayout, QStyle
+from PyQt5.QtWidgets import QMainWindow, QStyle
 
-from ui_main_window import Ui_MainWindow
-from config import Config
-from utils import screen_size, window_size
-from tabs.tab_keyboard import Keyboard
-from tabs.tab_settings import Settings
-
-TOOL_TITLE = "Digital Keyboard"
-TOOL_VER = "1.0"
-CONFIG_FILE = "config.yml"
+from .ui_main_window import Ui_MainWindow
+from .config import Config
+from .qt_utils import screen_size
+from .tabs.tab_keyboard import Keyboard
+from .tabs.tab_settings import Settings
 
 
 @dataclass
@@ -23,7 +17,7 @@ class TabRef:
     make: Callable
 
 # All tabs in the tool:
-# Names must match the config.yml and ui_main_window.py files.
+# Names must match the keyboard_config.yml and ui_main_window.py files.
 TABS = {
     # "status_tab": TabRef(lambda self: self.ui.status, lambda self, widget: Status(self.ui, widget, self.config)),
     # "connection_tab": TabRef(lambda self: self.ui.connection, lambda self, widget: Connection(self.ui, widget, self.config)),
@@ -33,14 +27,14 @@ TABS = {
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, app):
+    def __init__(self, app, config_file, tool_title, tool_ver):
         super().__init__()
 
         self.app = app
         app.setStyle("Breeze")
         app.aboutToQuit.connect(self.on_close)
 
-        self.config = Config(CONFIG_FILE)
+        self.config = Config(config_file)
 
         # create GUI
         self.ui = Ui_MainWindow()
@@ -67,7 +61,7 @@ class MainWindow(QMainWindow):
         self.ui.tabs.currentChanged.connect(self.current_tab_changed)
 
         # initialize the main window and all tabs
-        self.init_ui()
+        self.init_ui(tool_title, tool_ver)
 
     def _set_size(self):
         cw = self.config.main_window.width
@@ -91,9 +85,9 @@ class MainWindow(QMainWindow):
 
         return cw, ch
 
-    def init_ui(self):
+    def init_ui(self, tool_title, tool_ver):
         # set window title and size
-        self.setWindowTitle(TOOL_TITLE)
+        self.setWindowTitle(tool_title)
         self.setMinimumSize(self.config.main_window.min_width, self.config.main_window.min_height)
         w, h = self._set_size()
 
@@ -111,7 +105,7 @@ class MainWindow(QMainWindow):
             tab.resize_ui()
 
         # log the tool name and ver
-        self.log(f"{TOOL_TITLE} v{TOOL_VER}")
+        self.log(f"{tool_title} v{tool_ver}")
 
         # display possible config error
         self.log(self.config.error)

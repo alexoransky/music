@@ -1,4 +1,4 @@
-from tab import Tab
+from .tab import Tab
 
 
 class Settings(Tab):

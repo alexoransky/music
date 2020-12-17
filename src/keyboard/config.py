@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from yaml_doc import YamlDoc
+from .yaml_doc import YamlDoc
 
 
 @dataclass
@@ -40,7 +40,7 @@ class Config:
         visible: bool = True
         timer: int = 100
         start_note: str = "A0"  # "F2"
-        key_count: int = 88    # 34
+        key_count: int = 88     # 32
         show_labels: bool = True
         # MIDI
         port_in: str = "Arturia"

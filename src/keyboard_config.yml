@@ -9,8 +9,8 @@ main_window:
   min_width: 1200
   min_height: 800
   # Only when fixed_size is set to true:
-  width: 1600   # 1600
-  height: 800   # 1000
+  width: 800   # 1600
+  height: 400   # 800
   # Only when auto_shrink_to_screen is set to true:
   margin_x: 4
   margin_y: 4
@@ -30,9 +30,9 @@ main_window:
 keyboard_tab:
   visible: true
   timer: 1000
-  start_note: A0
-  key_count: 88
-  show_labels: false
+  start_note: F2  # A0
+  key_count: 32   # 88
+  show_labels: true
 
   # MIDI
   port_in: "Arturia"

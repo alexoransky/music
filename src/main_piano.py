@@ -1,16 +1,19 @@
 import sys
 import traceback
-
-from PyQt5 import QtWidgets
-
-from main_window import MainWindow
-from utils import delete_file
-
 from pprint import pprint
 from termcolor import cprint
 
-from audio import AudioSupport
+from PyQt5 import QtWidgets
 
+from audio.audio import AudioSupport
+
+from keyboard.main_window import MainWindow
+from keyboard.file_utils import delete
+
+
+TOOL_TITLE = "Digital Keyboard"
+TOOL_VER = "1.0"
+CONFIG_FILE = "keyboard_config.yml"
 EXCEPTION_LOG = "exception.log"
 
 
@@ -35,12 +38,12 @@ if __name__ == "__main__":
 
             sys.exit(0)
 
-    delete_file(EXCEPTION_LOG)
+    delete(EXCEPTION_LOG)
     sys.excepthook = exception_hook
 
     app = QtWidgets.QApplication(sys.argv)
 
-    main_window = MainWindow(app)
+    main_window = MainWindow(app, CONFIG_FILE, TOOL_TITLE, TOOL_VER)
     main_window.show()
 
     sys.exit(app.exec_())

@@ -356,4 +356,4 @@ pyfluidsynth was updated to 1.3.0 and needed to be patched again.
 
 12/16/2020
 
-The next step is to set up Qt 5 and PyQt 5 again.
+Moved a few modules around, created keyboard, audio and theory packages.

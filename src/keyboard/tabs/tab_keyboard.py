@@ -1,10 +1,10 @@
 from copy import copy
 from PyQt5.QtCore import Qt, QRect
-from PyQt5.QtWidgets import QWidget, QGraphicsRectItem, QGraphicsTextItem, QGraphicsScene, QGraphicsView
-from tab import Tab
-from audio import AudioSupport
-from chords import Chord
-from notes import Note
+from PyQt5.QtWidgets import QGraphicsRectItem, QGraphicsTextItem, QGraphicsScene, QGraphicsView
+from audio.audio import AudioSupport
+from theory.chords import Chord
+from theory.notes import Note
+from .tab import Tab
 
 
 KEYS = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"]
