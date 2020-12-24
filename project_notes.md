@@ -311,38 +311,37 @@ are removed, thus, with the removal of 610, 3 scales can be generated:
 3. 610, 996, 182
 
 09/05/2020
-
+----------
 Started working on the UI again.  Investigated urwid BarGraph widget to create a terminal view.
 Also, found this project that uses Qt5:
 https://github.com/killalea/digital-keyboard
 It seems to be the most promising.
 
 09/11/2020
-
+----------
 Added a tabbed GUI app that displays a keyboard.
 The project that I found (digital keybaord) was inspirational, I learned how the scene and labels can be used.
 Everything else had to be rewritten.
 
 9/12/2020
-
+----------
 Collected all common MIDI and Synth tasks in the AudioSupport class.
 
 9/13/2020
+----------
 A note on "Cannot mix incompatible Qt library" when running Qt Designer or qt5ct tool or other Qt tools due to the inconsuistent update in Qt libs.
 In my case it was an update from Qt 5.15.0 to 5.15.1.  
 This is resolved by updating qt5-styleplugins, although it might take a few days.  Also, the tool does not store the config, henerates a sigfault.
 
 For the project, added display of notes and chords that are being played.
   
-
 12/14/2020
-
+----------
 Got back to the project after a long break- was busy at work. Also, had to reinstall the system.
 Anyway, slowly started recalling where I left the project a few months back.
 
-
 12/15/2020
-
+----------
 One of the ideas is to put together a chords tool that would:
 - display the notes that the entered chord has
 - play the chord
@@ -353,7 +352,40 @@ The first two items are already implemented in the main.py module.
 
 pyfluidsynth was updated to 1.3.0 and needed to be patched again.
 
-
 12/16/2020
-
+----------
 Moved a few modules around, created keyboard, audio and theory packages.
+
+Started looking at FFT again.  Foound this (also on PyPi:
+https://pyfftw.readthedocs.io/en/latest/
+
+Also, there is an example that generates a real time FFT histogram:
+https://python-sounddevice.readthedocs.io/en/latest/examples.html#plot-microphone-signal-s-in-real-time
+
+The latter uses sounddevice (0.4.1 as of now) which is a Python APIs for PortAudio.
+
+12/19/2020
+----------
+Spent couple days exploring FFT options and building the tuner.  
+The idea is to have an FFT that produces a list of frequencies and magnitudes that
+would be suitable for working with the tuner and the chord recognizer.
+
+The FFT class so far uses a short FFT algorithm, numpy, scipy and sounddevice APIs. 
+
+There is a second solution that uses a short time FT algorithm, numpy and pyaudio:
+https://mzucker.github.io/2016/08/07/ukulele-tuner.html
+
+There is a good explanation how STFT works:
+https://kevinsprojects.wordpress.com/2014/12/13/short-time-fourier-transform-using-python-and-numpy/#:~:text=The%20Short%20Time%20Fourier%20Transform%20(STFT)%20is%20a,a%20waterfall%20plot%20which%20shows%20frequency%20against%20time.
+https://github.com/KevinNJ/Projects/tree/master/Short%20Time%20Fourier%20Transform
+
+An excellent book that explains the design choices behind STFT:
+https://www.dsprelated.com/freebooks/sasp/
+
+12/22/2020
+----------
+Reorganized the code- store samples in a deque so that they can be processed in a separate thread.
+
+12/24/2020
+----------
+Added separate classes for input devices that are based on SoundDevice and PyAudio.

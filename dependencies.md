@@ -36,3 +36,7 @@ The project depends on Python and the following Python libs:
         python-rtmidi generated an error:
         FileNotFoundError: [Errno 2] No such file or directory: 'pkg-config'
 
+- scipy
+  
+        tested scipy 1.5.4
+  
