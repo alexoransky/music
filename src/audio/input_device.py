@@ -125,7 +125,7 @@ class SDInputDevice(InputDevice):
 
         with sd.InputStream(device=self._device,
                             channels=self._channel_cnt,
-                            # dtype="int16",
+                            dtype="float32",   # "int16",
                             callback=self._callback_fn,
                             blocksize=self._samples_per_frame,
                             samplerate=self._sample_rate):
