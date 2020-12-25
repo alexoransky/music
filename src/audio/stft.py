@@ -56,7 +56,7 @@ class STFT:
         self.full_buffer_window = np.hanning(self.samples_per_fft)
 
         self.buffer = None
-        self.frame_cnt = 0
+        self.frame_cnt = 1
         self.clear()
 
     def clear(self):
@@ -90,3 +90,9 @@ class STFT:
         spectrum = np.abs(np.fft.rfft(self.buffer * window))
 
         return spectrum
+
+    def bin_to_freq(self, bin):
+        return bin * self.freq_step
+
+    def freq_to_bin(self, freq):
+        return np.int32(np.floor(freq / self.freq_step))
