@@ -13,6 +13,7 @@ FRAMES_PER_FFT = 16
 
 NOTE_MIN = 60       # C4
 NOTE_MAX = 69       # A4
+# NOTE_MAX = 107    # B7
 NOTE_NAMES = 'C C# D D# E F F# G G# A A# B'.split()
 
 
@@ -57,7 +58,10 @@ class Tuner:
             print("\r                                        ", end="")
             return
 
-        # max_val = np.amax(spectrum[self.imin:self.imax])
+        max_val = np.amax(spectrum[self.imin:self.imax])
+        if max_val < 4:
+            return
+
         # min_val = np.amin(spectrum)
 
         # Get frequency of maximum response in range
@@ -70,9 +74,12 @@ class Tuner:
         # Console output once we have a full buffer
         self.num_frames += 1
 
-        if self.num_frames >= self.frames_per_fft:
-            print("\r                                        ", end="")
-            print("\r{}  {:7.2f} Hz {:+.2f}".format(self.note_name(n0), freq, n - n0), end="")
+        # if self.num_frames >= self.frames_per_fft:
+        #     print("\r                                        ", end="")
+        #     print("\r{}  {:7.2f} Hz {:+.2f}".format(self.note_name(n0), freq, n - n0), end="")
+
+        print("\r                                        ", end="")
+        print("\r{}  {:7.2f} Hz {:+.2f}".format(self.note_name(n0), freq, n - n0), end="")
 
 
 if __name__ == "__main__":
