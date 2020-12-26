@@ -5,11 +5,12 @@ from .temperaments import TET12
 from .validate import validate_int
 
 tet12 = TET12()
+NOTE_A_FREQ_HZ = 440
 SUBSCRIPT_0 = 8320
 
 
 # MIDI note numbers are 0 to 127
-# Piano keys range is 21 to 108 of MIDI range
+# Piano keys range is 21 (A0) to 108 (C8) of MIDI range
 
 class Note:
     NOTES = {"A": 0, "B": 1, "C": 2, "D": 3, "E": 4, "F": 5, "G": 6}
@@ -41,7 +42,7 @@ class Note:
         self.number = None
         self.octave = None
 
-        self.note_a_freq_hz = 440
+        self.note_a_freq_hz = NOTE_A_FREQ_HZ
 
         if midi_number is not None:
             self._create_from_midi(midi_number, suggested_root)
@@ -107,6 +108,30 @@ class Note:
         octave = note_name[-1:]
         name = cls.validate_name(note_name[:-1])
         return (int(octave) + 1) * 12 + tet12.note_to_number(name)
+
+    @classmethod
+    def note_name_to_freq_hz(cls, note_name):
+        midi_number = Note.note_name_to_midi_number(note_name)
+        return Note.midi_number_to_freq_hz(midi_number)
+
+    @classmethod
+    def midi_number_to_freq_hz(cls, midi_number):
+        f = NOTE_A_FREQ_HZ * math.pow(2, (midi_number - 69) / 12)
+        f_prev = NOTE_A_FREQ_HZ * math.pow(2, (midi_number - 70) / 12)
+        f_next = NOTE_A_FREQ_HZ * math.pow(2, (midi_number - 68) / 12)
+        return f, (f+f_prev)/2, (f+f_next)/2
+
+    @classmethod
+    def freq_to_midi_number(cls, freq_hz):
+        midi_number = 69 + 12 * math.log2(freq_hz/NOTE_A_FREQ_HZ)
+        if (midi_number - int(midi_number)) > 0.5:
+            midi_number += 1
+        return int(midi_number)
+
+    @classmethod
+    def freq_to_note_name(cls, freq_hz):
+        midi_number = Note.freq_to_midi_number(freq_hz)
+        return Note.midi_number_to_note_name(midi_number)
 
     @classmethod
     def validate_name(cls, name):
