@@ -65,7 +65,7 @@ class Tuner:
         nf = 0.0
         start_time = time.time()
         state = 0
-        print("Sampling at {} Hz with max resolution of {:7.2f} Hz".format(self.transform.sample_rate,
+        print("Sampling at {} Hz with max resolution of {:5.2f} Hz".format(self.transform.sample_rate,
                                                                            self.transform.freq_step))
         print("\rInitializing...", end="")
 

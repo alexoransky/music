@@ -399,3 +399,8 @@ Found Chirp Z-transform (CZT) algorithm.  The CZT allows to "zoom-in" on a speci
 and not to process the rest:
 https://pypi.org/project/czt/
 https://github.com/garrettj403/CZT/
+
+12/28/2020
+----------
+Finally, updated the tuner class to work with either the STFT or CZT transform.
+CZT works faster and a lot more precise in the desired range.

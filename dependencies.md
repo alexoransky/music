@@ -39,4 +39,15 @@ The project depends on Python and the following Python libs:
 - scipy
   
         tested scipy 1.5.4
-  
+
+- czt
+
+        tested czt 0.0.2
+
+- sounddevice
+
+        tested sounddevice 0.4.1
+
+- pyaudio
+
+        tested pyaudio 0.2.11
