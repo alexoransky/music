@@ -1,19 +1,16 @@
 from threading import Thread
 from fifo_queue import FIFOQueue
-from time import sleep
 
 import sounddevice as sd
 import pyaudio
 
 
-# PortAudio has a bug that does not let setting varios sample rates
-DEFAULT_SAMPLE_RATE = 48000
-
-
 class InputDevice:
+    DEFAULT_SAMPLE_RATE = 48000
+
     def __init__(self, device, channel_cnt: int, samples_per_frame: int, queue_data: bool, max_queue_len: int):
         self._device = device
-        self._sample_rate = DEFAULT_SAMPLE_RATE
+        self._sample_rate = InputDevice.DEFAULT_SAMPLE_RATE
 
         self._channel_cnt = channel_cnt
         self._active = False
@@ -24,8 +21,14 @@ class InputDevice:
         # data will either be queued or processed by the supplied process function
         self._process_fn = None
         self._queue = None
-        if queue_data:
+        self._queue_data = queue_data
+        if self._queue_data:
             self._queue = FIFOQueue(max_len=max_queue_len)
+
+        # stats
+        self.sample_cnt = 0
+        self.sample_error_cnt = 0
+        self.queue_error_cnt = 0
 
     @classmethod
     def available_devices(cls):
@@ -47,18 +50,43 @@ class InputDevice:
         self._channel_cnt = cnt
 
     def set_process_fn(self, process_fn):
+        """
+        Use this method to set the process function for the received data when the data is NOT queued.
+        :param process_fn: user-supllied function to process data
+        """
+        if self._queue_data:
+            self._process_fn = None
+            return
+
         self._process_fn = process_fn
 
+    def data_is_queued(self):
+        return self._queue_data
+
     def start(self):
+        """
+        This methods starts data reception.
+        Overwrite this method to add functionality to actully start the device.
+        :return:
+        """
         self._active = True
         self._thread = Thread(target=self._main_loop)
         self._thread.start()
 
     def stop(self):
+        """
+        This method stops data reception.
+        Overwrite this method to actually stop the device.
+        :return:
+        """
         self._active = False
         self._thread.join()
 
     def get_data(self):
+        """
+        This method returnes the data from the queue (when the data is queued)
+        :return:
+        """
         if self._queue is None:
             return None
         return self._queue.get()
@@ -68,21 +96,50 @@ class InputDevice:
             return None
         return self._queue.size()
 
+    def _data_copy(self, data):
+        """
+        This method is used when the data that is read from a device, such as SoundDevice,
+         needs to be buffered before it can be processed.
+         SoundDevice data needs data[:, 0  or data.copy to be copied.
+         Overwrite this method if other way to buffer data is needed.
+        :param data: raw data from the device's stream
+        :return: a copy of the supplied data
+        """
+        return data.copy()   # data[:, 0]
+
     def _callback_fn(self, indata, frames, time, status):
-        if self._queue is not None:
-            self._queue.put(indata)
+        """
+        This method is used as a callback in SoundDevice and other streams.
+        Most likely, there is no need to overwrite it.
+        """
+        if not any(indata):
+            return
+
+        if status:
+            self.sample_error_cnt += 1
+            return
+
+        self.sample_cnt += 1
+
+        if self._queue_data:
+            if self._queue is not None:
+                if not self._queue.put(self._data_copy(indata)):
+                    self.queue_error_cnt += 1
+            return
 
         if self._process_fn is not None:
-            self._process_fn(indata)
+            self._process_fn(self._data_copy(indata))
 
     def _main_loop(self):
+        """
+        Overwrite this method to receive the data from the device
+        """
         if not self._active:
             return
-        # implement the receive loop here
 
 
 class SDInputDevice(InputDevice):
-    def __init__(self, device=None, channel_cnt=1, samples_per_frame=2048, queue_data=True, max_queue_len=200):
+    def __init__(self, device=None, channel_cnt=1, samples_per_frame=2048, queue_data=True, max_queue_len=5):
         super(SDInputDevice, self).__init__(device=device,
                                             channel_cnt=channel_cnt,
                                             samples_per_frame=samples_per_frame,
@@ -92,10 +149,6 @@ class SDInputDevice(InputDevice):
         if device is not None:
             self.set_device(device)
 
-        # data will either be queued or processed by the supplied function
-        # data is formatted as specified in the callback section:
-        # https://python-sounddevice.readthedocs.io/en/0.4.1/api/streams.html
-
     @classmethod
     def available_devices(cls):
         return sd.query_devices()
@@ -103,21 +156,6 @@ class SDInputDevice(InputDevice):
     def set_device(self, device):
         self._device = device
         self._sample_rate = sd.query_devices(self._device, 'input')['default_samplerate']
-
-    def _callback_fn(self, indata, frames, time, status):
-        if not any(indata):
-            return
-
-        if status:
-            return
-
-        data = indata.copy()
-
-        if self._queue is not None:
-            self._queue.put(data)
-
-        if self._process_fn is not None:
-            self._process_fn(data)
 
     def _main_loop(self):
         if not self._active:
@@ -135,7 +173,7 @@ class SDInputDevice(InputDevice):
 
 
 class PAInputDevice(InputDevice):
-    def __init__(self, device=None, channel_cnt=1, samples_per_frame=2048, queue_data=True, max_queue_len=200):
+    def __init__(self, device=None, channel_cnt=1, samples_per_frame=2048, queue_data=True, max_queue_len=5):
         super(PAInputDevice, self).__init__(device=device,
                                             channel_cnt=channel_cnt,
                                             samples_per_frame=samples_per_frame,
@@ -169,18 +207,8 @@ class PAInputDevice(InputDevice):
         self._stream.start_stream()
         super(PAInputDevice, self).stop()
 
-    def _callback_fn(self, indata, frames, time, status):
-        if not any(indata):
-            return
-
-        if status:
-            return
-
-        if self._queue is not None:
-            self._queue.put(indata)
-
-        if self._process_fn is not None:
-            self._process_fn(indata)
+    def _data_copy(self, data):
+        return data
 
     def _main_loop(self):
         if not self._active:

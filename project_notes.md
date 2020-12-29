@@ -389,3 +389,13 @@ Reorganized the code- store samples in a deque so that they can be processed in 
 12/24/2020
 ----------
 Added separate classes for input devices that are based on SoundDevice and PyAudio.
+
+12/26/2020
+----------
+Yesterday was looking for ways to not waste time to do FFT on the spectrum above 5 KHz. 
+75% of the sonic spectrum is not needed for music anyway and DFT requires all samples to provide
+desired frequency resolution and, therefore, slow.  
+Found Chirp Z-transform (CZT) algorithm.  The CZT allows to "zoom-in" on a specific frequency band 
+and not to process the rest:
+https://pypi.org/project/czt/
+https://github.com/garrettj403/CZT/
