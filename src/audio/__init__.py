@@ -6,6 +6,7 @@ from audio.synth import Synth
 from audio.tuning import Tuning
 from audio.transforms import STFT, CZT
 from audio.input_device import SDInputDevice, PAInputDevice
+from audio.fifo_queue import FIFOQueue
 
 __all__ = ["AudioSupport", "MIDIRouter", "MIDIPort", "MIDIMetronome", "MIDIParser", "MIDINote",
-           "Synth", "Tuning", "STFT", "CZT", "SDInputDevice", "PAInputDevice"]
+           "Synth", "Tuning", "STFT", "CZT", "SDInputDevice", "PAInputDevice", "FIFOQueue"]

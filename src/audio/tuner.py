@@ -11,6 +11,7 @@ from threading import Thread
 
 class Tuner:
     INIT_TIME_S = 2
+    DEBUG_OUTPUT = True
 
     THRESHOLD_DB = 25
     USE_SD = True
@@ -62,6 +63,23 @@ class Tuner:
         self._thread.join()
 
     def _main_loop(self):
+        def error_str():
+            s = ""
+            qsize = self.device.queue_size()
+            qerrors = self.device.queue_error_cnt
+            if qsize > 1:
+                s = f"Q:{qsize} "
+            if qerrors > 0:
+                s = f"Q:{qsize} QE:{qerrors} "
+
+            serrors = self.device.sample_error_cnt
+            if serrors > 0:
+                s += f"SE:{serrors}"
+
+            if len(s):
+                s = "[" + s.rstrip() + "]"
+            return s
+
         nf = 0.0
         start_time = time.time()
         state = 0
@@ -76,7 +94,8 @@ class Tuner:
             if state == 0:
                 curr_time = time.time()
                 if (curr_time - start_time) > Tuner.INIT_TIME_S:
-                    # print(f"\rNF={nf}             ")
+                    if Tuner.DEBUG_OUTPUT:
+                        print(f"\rNF={nf}             ")
                     print("\r                                        ", end="")
                     state = 1
 
@@ -88,7 +107,20 @@ class Tuner:
                 nf = self._determine_noise_floor(data, nf)
 
             if state == 1:
-                self.process_data(data, nf)
+                peak_freq = self.process_data(data, nf)
+                if peak_freq is None:
+                    continue
+
+                midi_num = Note.freq_to_midi_number(peak_freq)
+                f0, _, _ = Note.midi_number_to_freq_hz(midi_num)
+                note = Note.midi_number_to_note_name(midi_num)
+
+                err_str = ""
+                if Tuner.DEBUG_OUTPUT:
+                    err_str = error_str()
+
+                print("\r                                                  ", end="")
+                print("\r{}  {:7.2f} Hz {:+.2f} Hz  {}".format(note, peak_freq, peak_freq - f0, err_str), end="")
 
     def _determine_noise_floor(self, data, nf):
         if data is None:
@@ -104,11 +136,11 @@ class Tuner:
 
     def process_data(self, data, nf=0):
         if data is None:
-            return
+            return None
 
         spectrum = self.transform.process(data)
         if spectrum is None:
-            return
+            return None
 
         clipped = spectrum[self.bin_range[0]:self.bin_range[1]]
         max_val = np.amax(clipped)
@@ -117,21 +149,15 @@ class Tuner:
         if nf > 0:
             db = 20 * np.log10(max_val / nf)
             if db < self.threshold:
-                return
+                return None
         else:
             if max_val < 0.01:
-                return
+                return None
 
         peak = clipped.argmax() + self.bin_range[0]
 
         if peak == self.bin_range[0]:
-            return
+            return None
 
         peak_freq = self.transform.bin_to_freq(peak)
-
-        midi_num = Note.freq_to_midi_number(peak_freq)
-        f0, _, _ = Note.midi_number_to_freq_hz(midi_num)
-        note = Note.midi_number_to_note_name(midi_num)
-
-        print("\r                                        ", end="")
-        print("\r{}  {:7.2f} Hz {:+.2f} Hz".format(note, peak_freq, peak_freq - f0), end="")
+        return peak_freq

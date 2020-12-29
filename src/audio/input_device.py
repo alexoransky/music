@@ -1,5 +1,5 @@
 from threading import Thread
-from fifo_queue import FIFOQueue
+from audio.fifo_queue import FIFOQueue
 
 import sounddevice as sd
 import pyaudio
