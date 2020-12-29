@@ -39,7 +39,7 @@ class Ui_MainWindow(object):
         self.widget_keyboard.setGeometry(QtCore.QRect(20, 579, 717, 197))
         self.widget_keyboard.setObjectName("widget_keyboard")
         self.label_notes = QtWidgets.QLabel(self.groupBox_keyboard)
-        self.label_notes.setGeometry(QtCore.QRect(10, 344, 221, 41))
+        self.label_notes.setGeometry(QtCore.QRect(10, 10, 221, 41))
         font = QtGui.QFont()
         font.setPointSize(16)
         self.label_notes.setFont(font)
