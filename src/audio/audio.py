@@ -33,10 +33,11 @@ class AudioSupport:
 
         return in_ports, out_ports
 
-    def start_midi(self, port_in, port_out, sound_font_path=None, bank=None, preset=None, start_parser=True):
+    def start_midi(self, port_in, port_out, sound_font_path=None, bank=None, preset=None, start_parser=True,
+                   note_a_freq=440, tuning=Tuning.TUNING_12_TET):
         self.synth = Synth()
         self.synth.start()
-        self.synth.tune(0, 432, tuning=Tuning.TUNING_5_LIMIT)
+        self.synth.tune(0, note_a_freq, tuning=tuning)
 
         # alternative sound font
         if sound_font_path is not None:
