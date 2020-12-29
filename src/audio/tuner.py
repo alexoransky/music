@@ -23,7 +23,11 @@ class Tuner:
         SAMPLES_PER_FRAME = 12 * 1024
         FREQ_STEP = 0.1
 
-    def __init__(self, device, freq_range=(65, 500)):
+    # refer to the table of note frequencies when defining the tuner's range:
+    # https: // en.wikipedia.org / wiki / Piano_key_frequencies
+    FREQ_RANGE = (63, 508)  # allow detection from C2 to B4
+
+    def __init__(self, device, freq_range=FREQ_RANGE):
         self.freq_range = freq_range
         self.threshold = Tuner.THRESHOLD_DB
 
@@ -51,7 +55,7 @@ class Tuner:
 
     def start(self):
         if not self.device.data_is_queued():
-            self.device.set_process_fn(self.process_data)
+            self.device.set_process_fn(self._process_data)
         self.device.start()
         self._active = True
         self._thread = Thread(target=self._main_loop)
@@ -100,14 +104,13 @@ class Tuner:
                     state = 1
 
             if self.device.data_is_queued():
-                # if data is not queued, the function will be a call back
                 data = self.device.get_data()
 
             if state == 0:
                 nf = self._determine_noise_floor(data, nf)
 
             if state == 1:
-                peak_freq = self.process_data(data, nf)
+                peak_freq = self._process_data(data, nf)
                 if peak_freq is None:
                     continue
 
@@ -134,7 +137,7 @@ class Tuner:
         nf = max(nf, np.average(clipped))
         return nf
 
-    def process_data(self, data, nf=0):
+    def _process_data(self, data, nf=0):
         if data is None:
             return None
 
@@ -145,7 +148,6 @@ class Tuner:
         clipped = spectrum[self.bin_range[0]:self.bin_range[1]]
         max_val = np.amax(clipped)
 
-        db = 0
         if nf > 0:
             db = 20 * np.log10(max_val / nf)
             if db < self.threshold:
@@ -154,10 +156,6 @@ class Tuner:
             if max_val < 0.01:
                 return None
 
-        peak = clipped.argmax() + self.bin_range[0]
-
-        if peak == self.bin_range[0]:
-            return None
-
-        peak_freq = self.transform.bin_to_freq(peak)
+        peak_bin = clipped.argmax() + self.bin_range[0]
+        peak_freq = self.transform.bin_to_freq(peak_bin)
         return peak_freq
