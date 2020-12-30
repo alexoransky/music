@@ -77,7 +77,7 @@ which installs the latest FS, use:
 
 7. Install termcolor, num2words and other Python APIs as necessary
 
-8. Install sounddevice and czt, numpy etc to make apps like tuner
+8. Install sounddevice and numpy etc. to make apps like tuner
 
 
 SimpleSynth Installation

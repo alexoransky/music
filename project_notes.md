@@ -400,7 +400,28 @@ and not to process the rest:
 https://pypi.org/project/czt/
 https://github.com/garrettj403/CZT/
 
+The version that I loked at was czt 0.0.2
+
 12/28/2020
 ----------
 Finally, updated the tuner class to work with either the STFT or CZT transform.
 CZT works faster and a lot more precise in the desired range.
+
+12/29/2020
+----------
+Optimized the CZT code. I moved all constants to the constructor of the class so that they are not
+computed in every cycle. This improved the speed by 2x.
+
+CZT was first published:
+Rabiner, L., Schafer, R., Rader, C. The Chirp z-Transform Algorithm. IEEE Trans. Audio Electroacoustics, Au-17, 2, Jun. 1969.
+https://web.ece.ucsb.edu/Faculty/Rabiner/ece259/Reprints/015_czt.pdf
+
+Also, for the mathematics of the fast inverse CZT, see:
+Sukhoy, V., Stoytchev, A. Generalizing the inverse FFT off the unit circle. Sci Rep 9, 14443 (2019). 
+https://doi.org/10.1038/s41598-019-50234-9
+
+I also started looking into usage of PyFFTW.  There are two things to worry about:
+1. License is GPL.
+2. There is no real gain in speed even when using PyFFTW interfaces with enabled cache etc.
+
+I am not going to use PyFFTW at least for now.

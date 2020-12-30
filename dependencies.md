@@ -40,10 +40,6 @@ The project depends on Python and the following Python libs:
   
         tested scipy 1.5.4
 
-- czt
-
-        tested czt 0.0.2
-
 - sounddevice
 
         tested sounddevice 0.4.1

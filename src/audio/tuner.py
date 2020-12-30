@@ -11,7 +11,7 @@ from threading import Thread
 
 class Tuner:
     INIT_TIME_S = 2
-    DEBUG_OUTPUT = True
+    DEBUG_OUTPUT = False
 
     THRESHOLD_DB = 25
     USE_SD = True
@@ -20,7 +20,7 @@ class Tuner:
         SAMPLES_PER_FRAME = 2 * 1024
         FRAMES_PER_FFT = 16
     else:
-        SAMPLES_PER_FRAME = 12 * 1024
+        SAMPLES_PER_FRAME = 6 * 1024
         FREQ_STEP = 0.1
 
     # refer to the table of note frequencies when defining the tuner's range:
