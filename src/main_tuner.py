@@ -8,10 +8,11 @@ DEVICE = 5
 
 GUITAR_TUNER_RANGE = (80, 340)    # allow detection from E2 to E4
 UKULELE_TUNER_RANGE = (253, 453)  # allow detection from C4 to A4
-OCT4_TUNER_RANGE = (253, 505)  # allow detection from C4 to B4
+OCT4_TUNER_RANGE = (253, 505)     # allow detection from C4 to B4
+F2_C5_TUNER_RANGE = (84, 539)     # allow detection from F2 to C5
 
 if __name__ == "__main__":
     print(SDInputDevice.available_devices())
 
-    tuner = Tuner(device=DEVICE, freq_range=OCT4_TUNER_RANGE)
+    tuner = Tuner(device=DEVICE, freq_range=F2_C5_TUNER_RANGE, freq_step=1.0)
     tuner.start()

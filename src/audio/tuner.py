@@ -11,7 +11,7 @@ from threading import Thread
 
 class Tuner:
     INIT_TIME_S = 2
-    DEBUG_OUTPUT = False
+    DEBUG_OUTPUT = True
 
     THRESHOLD_DB = 25
     USE_SD = True
@@ -21,17 +21,13 @@ class Tuner:
         FRAMES_PER_FFT = 16
     else:
         SAMPLES_PER_FRAME = 2 * 1024
-        FREQ_STEP = 0.2
+        FREQ_STEP = 0.1
 
-    # refer to the table of note frequencies when defining the tuner's range:
-    # https: // en.wikipedia.org / wiki / Piano_key_frequencies
-    FREQ_RANGE = (63, 508)  # allow detection from C2 to B4
-
-    def __init__(self, device, freq_range=FREQ_RANGE):
+    def __init__(self, device, freq_range, samples_per_frame=SAMPLES_PER_FRAME, freq_step=FREQ_STEP):
         self.freq_range = freq_range
         self.threshold = Tuner.THRESHOLD_DB
 
-        self.samples_per_frame = Tuner.SAMPLES_PER_FRAME
+        self.samples_per_frame = samples_per_frame
 
         if Tuner.USE_SD:
             self.device = SDInputDevice(device=device, samples_per_frame=self.samples_per_frame, queue_data=True)
@@ -45,7 +41,7 @@ class Tuner:
                                   frames_per_fft=Tuner.FRAMES_PER_FFT)
         else:
             self.transform = CZT(self.sample_rate, samples_per_frame=self.samples_per_frame, freq_range=freq_range,
-                                 freq_step=Tuner.FREQ_STEP)
+                                 freq_step=freq_step)
 
         self.bin_range = (self.transform.freq_to_bin(self.freq_range[0]),
                           self.transform.freq_to_bin(self.freq_range[1]))
