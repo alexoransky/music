@@ -23,6 +23,10 @@ NORM_BLACK_KEY_WIDTH = round(BLACK_KEY_WIDTH / WHITE_KEY_GAP)
 NORM_WHITE_KEY_GAP = 1
 BW_RATIO = NORM_BLACK_KEY_WIDTH / NORM_WHITE_KEY_WIDTH
 
+# WHITE_COLOR = Qt.white
+WHITE_KEY_COLOR = Qt.lightGray
+BLACK_KEY_COLOR = Qt.black
+
 
 class Keyboard(Tab):
     def __init__(self, ui, tab, config, log_fn=print):
@@ -272,7 +276,7 @@ class KeyWidget(QGraphicsRectItem):
         self.label = None
 
         if note in WHITE_KEYS:
-            self.setBrush(Qt.white)
+            self.setBrush(WHITE_KEY_COLOR)
             # set the label
             self.label = QGraphicsTextItem()
             self.label.setDefaultTextColor(Qt.black)
@@ -294,6 +298,6 @@ class KeyWidget(QGraphicsRectItem):
 
     def release(self):
         if self.note in WHITE_KEYS:
-            self.setBrush(Qt.white)
+            self.setBrush(WHITE_KEY_COLOR)
         else:
-            self.setBrush(Qt.black)
+            self.setBrush(BLACK_KEY_COLOR)
