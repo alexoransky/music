@@ -15,15 +15,6 @@ fft = np.fft.fft
 rfft = np.fft.rfft
 ifft = np.fft.ifft
 
-# USE_PYFFTW = False
-# if USE_PYFFTW:
-#     import pyfftw
-#     pyfftw.interfaces.cache.enable()
-#     pyfftw.interfaces.cache.set_keepalive_time(100)
-#     fft = pyfftw.interfaces.numpy_fft.fft
-#     rfft = pyfftw.interfaces.numpy_fft.rfft
-#     ifft = pyfftw.interfaces.numpy_fft.ifft
-
 
 class STFT:
     def __init__(self, sample_rate, samples_per_frame=2048, frames_per_fft=16, sample_dtype=np.float32):

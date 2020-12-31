@@ -424,4 +424,28 @@ I also started looking into usage of PyFFTW.  There are two things to worry abou
 1. License is GPL.
 2. There is no real gain in speed even when using PyFFTW interfaces with enabled cache etc.
 
-I am not going to use PyFFTW at least for now.
+I am not going to use PyFFTW, at least for now. 
+If PyFFTW really needed, it can be added into the transform code:
+
+```
+   # USE_PYFFTW = False
+   # if USE_PYFFTW:
+   #     import pyfftw
+   #     pyfftw.interfaces.cache.enable()
+   #     pyfftw.interfaces.cache.set_keepalive_time(100)
+   #     fft = pyfftw.interfaces.numpy_fft.fft
+   #     rfft = pyfftw.interfaces.numpy_fft.rfft
+   #     ifft = pyfftw.interfaces.numpy_fft.ifft
+```
+
+12/31/2020
+----------
+
+I have worked on the code a bit more and moved the listening thread into its own process.
+The speed improved 4x compared to the threading application.
+it seems that it is sufficient to have 2K (2,048) samples to resolve frequencies of the big 
+part of 4th octave down to 0.2 Hz - notes C4 to A4.  The bandwidth in question is 200 Hz.
+The sampling rate of the mic is 48,000 Hz.
+The tuner is pretty responsive- 2048 out of 48000 gives 43.7 ms worth of samples.
+I tried to make it faster- 1024 sample with the frequency resolution of 0.4 Hz, but the results
+are all over the place. 

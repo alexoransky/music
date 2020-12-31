@@ -20,8 +20,8 @@ class Tuner:
         SAMPLES_PER_FRAME = 2 * 1024
         FRAMES_PER_FFT = 16
     else:
-        SAMPLES_PER_FRAME = 6 * 1024
-        FREQ_STEP = 0.1
+        SAMPLES_PER_FRAME = 2 * 1024
+        FREQ_STEP = 0.2
 
     # refer to the table of note frequencies when defining the tuner's range:
     # https: // en.wikipedia.org / wiki / Piano_key_frequencies

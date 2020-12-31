@@ -1,4 +1,5 @@
 from queue import Queue
+from multiprocessing import Queue as MPQueue
 from collections import deque
 
 
@@ -6,9 +7,13 @@ from collections import deque
 # The queue can be either - regular queue or deque.
 # It also can be limited in size.
 class FIFOQueue:
-    def __init__(self, is_deque=True, max_len=200):
+    def __init__(self, multiprocess=False, is_deque=True, max_len=200):
+        if multiprocess:
+            is_deque = False
+
         self._queue = None
         self._use_deque = is_deque
+        self._use_mpqueue = multiprocess
         if self._use_deque:
             if max_len == 0:
                 max_len = None
@@ -16,7 +21,10 @@ class FIFOQueue:
         else:
             if max_len is None:
                 max_len = 0
-            self._queue = Queue(maxsize=max_len)
+            if self._use_mpqueue:
+                self._queue = MPQueue(maxsize=max_len)
+            else:
+                self._queue = Queue(maxsize=max_len)
 
     def clear(self):
         if self._use_deque:
