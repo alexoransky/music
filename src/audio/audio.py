@@ -96,3 +96,6 @@ class AudioSupport:
 
         self.is_active = False
         self.parser_thread.join()
+
+    def send_midi_message(self, message):
+        self.midi_router.put_message(message)

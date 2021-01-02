@@ -86,7 +86,10 @@ class MIDIParser:
         if n is not None:
             # note = MIDINote(int(n.group(CHANNEL)), int(n.group(NOTE)), int(n.group(VELOCITY)))
             note_num = int(n.group(NOTE))
-            self.notes.remove(note_num)
+            try:
+                self.notes.remove(note_num)
+            except:
+                pass
             if self.note_fn is not None:
                 self.note_fn(note_num, False)
             return

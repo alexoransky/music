@@ -134,6 +134,9 @@ class MIDIRouter:
 
         return message
 
+    def put_message(self, message):
+        self.input_message_handler(message)
+
     def clear_messages(self):
         while True:
             if self.get_message() is None:

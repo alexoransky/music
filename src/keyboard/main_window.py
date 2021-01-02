@@ -114,6 +114,9 @@ class MainWindow(QMainWindow):
         self.ui.tabs.setCurrentIndex(0)
         self.current_tab_changed(0)
 
+        # status bar
+        self.ui.statusbar.showMessage("")
+
     def log(self, s):
         if s is None:
             return

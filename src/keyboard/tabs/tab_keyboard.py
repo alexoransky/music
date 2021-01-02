@@ -1,6 +1,7 @@
 from copy import copy
 from PyQt5.QtCore import Qt, QRect
 from PyQt5.QtWidgets import QGraphicsRectItem, QGraphicsTextItem, QGraphicsScene, QGraphicsView
+from mido import Message
 from audio import AudioSupport
 from theory.chords import Chord
 from theory.notes import Note
@@ -45,6 +46,7 @@ class Keyboard(Tab):
         self.audio_started = self.audio.start_midi(config.port_in, config.port_out)
         if self.audio_started:
             self.audio.parser.set_note_on_off_fn(self.note_fn)
+            self.keyboard_widget.set_midi_note_fn(self.key_press_fn)
         else:
             self.log("Cannot start MIDI")
 
@@ -82,6 +84,12 @@ class Keyboard(Tab):
         self.notes = copy(self.audio.parser.notes)
         self.keyboard_widget.update_key(note, is_on)
 
+    def key_press_fn(self, midi_note, is_on):
+        msg_type = "note_off"
+        if is_on:
+            msg_type="note_on"
+        self.audio.send_midi_message(Message(type=msg_type, note=midi_note))
+
     def on_close(self):
         self.audio.stop_midi()
         super().on_close()
@@ -107,6 +115,8 @@ class KeyboardWidget(QGraphicsView):
         self.white_key_gap = 0
         self.white_key_height = 0
         self.black_key_height = 0
+
+        self.key_press_fn = None
 
     def init_ui(self, max_w, max_h):
         self.widget.move(0, max_h * 0.5)
@@ -247,6 +257,9 @@ class KeyboardWidget(QGraphicsView):
     def _midi_note_to_idx(self, midi_note):
         return midi_note - self.midi_range[0]
 
+    def _idx_to_midi_note(self, idx):
+        return idx + self.midi_range[0]
+
     def update_key(self, midi_note, is_pressed):
         out_of_range = False
         idx = self._midi_note_to_idx(midi_note)
@@ -264,6 +277,44 @@ class KeyboardWidget(QGraphicsView):
             self.keys[idx].release()
 
         self.update_ui()
+
+    def set_midi_note_fn(self, key_press_fn):
+        self.key_press_fn = key_press_fn
+
+    def _mouse_pos_to_idx(self, pos):
+        for idx in range(self.key_cnt):
+            note = self._idx_to_note(idx)
+            if note not in WHITE_KEYS:
+                if self.keys[idx].contains(pos):
+                    return idx
+
+        for idx in range(self.key_cnt):
+            note = self._idx_to_note(idx)
+            if note in WHITE_KEYS:
+                if self.keys[idx].contains(pos):
+                    return idx
+
+        return None
+
+    def mousePressEvent(self, event):
+        found = None
+        if event.buttons() == Qt.LeftButton:
+            found = self._mouse_pos_to_idx(event.pos())
+        if found is None:
+            super().mousePressEvent(event)
+            return
+
+        note = self._idx_to_midi_note(found)
+        self.key_press_fn(note, True)
+
+    def mouseReleaseEvent(self, event):
+        found = self._mouse_pos_to_idx(event.pos())
+        if found is None:
+            super().mouseReleaseEvent(event)
+            return
+
+        note = self._idx_to_midi_note(found)
+        self.key_press_fn(note, False)
 
 
 class KeyWidget(QGraphicsRectItem):
