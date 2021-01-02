@@ -14,5 +14,5 @@ F2_C5_TUNER_RANGE = (84, 539)     # allow detection from F2 to C5
 if __name__ == "__main__":
     print(SDInputDevice.available_devices())
 
-    tuner = Tuner(device=DEVICE, freq_range=F2_C5_TUNER_RANGE, freq_step=1.0)
+    tuner = Tuner(device=DEVICE, freq_range=UKULELE_TUNER_RANGE, freq_step=0.2)
     tuner.start()
