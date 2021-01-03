@@ -33,7 +33,8 @@ class AudioSupport:
 
         return in_ports, out_ports
 
-    def start_midi(self, port_in, port_out, sound_font_path=None, bank=None, preset=None, start_parser=True,
+    def start_midi(self, port_in, port_out, sound_font_path=None, bank=None, preset=None,
+                   start_parser=True, port_in_mandatory=True,
                    note_a_freq=440, tuning=Tuning.TUNING_12_TET):
         self.synth = Synth()
         self.synth.start()
@@ -45,11 +46,17 @@ class AudioSupport:
             self.synth.setup_channel(channel=0, sound_font_path=sound_font_path, bank=bank, preset=preset)
 
         # find input and output MIDI ports
+        in_ports = []
         try:
             in_ports = MIDIRouter.available_ports(output=False)
+        except:
+            pass
+
+        out_ports = []
+        try:
             out_ports = MIDIRouter.available_ports(output=True)
         except:
-            return False
+            pass
 
         _port_in = None
         _port_out = None
@@ -64,9 +71,11 @@ class AudioSupport:
                 break
 
         self.midi_router = MIDIRouter(port_in=_port_in, port_out=_port_out, message_filter=["aftertouch"])
-        ret = self.midi_router.start()
+        ret = self.midi_router.start()                  # true if both input and output ports are initialized
+        if not port_in_mandatory:
+            ret = self.midi_router.port_out.is_open()   # true if only output port is initialized
 
-        if ret and start_parser:
+        if start_parser:
             self.start_midi_parser()
 
         return ret

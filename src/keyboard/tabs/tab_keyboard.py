@@ -43,12 +43,12 @@ class Keyboard(Tab):
 
         # start MIDI
         self.audio = AudioSupport()
-        self.audio_started = self.audio.start_midi(config.port_in, config.port_out)
+        self.audio_started = self.audio.start_midi(config.port_in, config.port_out, port_in_mandatory=False)
         if self.audio_started:
             self.audio.parser.set_note_on_off_fn(self.note_fn)
             self.keyboard_widget.set_midi_note_fn(self.key_press_fn)
         else:
-            self.log("Cannot start MIDI")
+            self.log("Cannot start audio")
 
     def init_ui(self):
         self.resize_widgets()
@@ -85,6 +85,9 @@ class Keyboard(Tab):
         self.keyboard_widget.update_key(note, is_on)
 
     def key_press_fn(self, midi_note, is_on):
+        if midi_note is None:
+            return
+
         msg_type = "note_off"
         if is_on:
             msg_type="note_on"
@@ -259,6 +262,8 @@ class KeyboardWidget(QGraphicsView):
         return midi_note - self.midi_range[0]
 
     def _idx_to_midi_note(self, idx):
+        if idx is None:
+            return None
         return idx + self.midi_range[0]
 
     def update_key(self, midi_note, is_pressed):
