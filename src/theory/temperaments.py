@@ -2,17 +2,19 @@ class Temperament:
     NOTE_TO_NUMBER = {}
     NUMBER_TO_NOTE = []
 
-    def note_to_number(self, note):
+    @classmethod
+    def note_to_number(cls, note):
         """
         :returns note number within the octave, 0-based (C)
         """
-        return self.NOTE_TO_NUMBER[note]
+        return cls.NOTE_TO_NUMBER[note]
 
-    def number_to_note(self, number):
+    @classmethod
+    def number_to_note(cls, number):
         """
         :returns tuple note names within the octave, 0-based (C)
         """
-        return self.NUMBER_TO_NOTE[number]
+        return cls.NUMBER_TO_NOTE[number]
 
 
 class TET12(Temperament):

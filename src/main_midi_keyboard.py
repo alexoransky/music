@@ -12,6 +12,11 @@ if sys.platform == "darwin":
 else:
     PORT_OUT = "FLUID Synth"
 
+CHANNEL = 0
+NOTE_A_FREQ = 440
+TUNING = Tuning.TUNING_12_TET
+# TUNING = Tuning.TUNING_5_LIMIT
+
 # Alternative sound font, bank and preset
 #SOUND_FONT = "../data/OmegaGMGS2.sf2"
 #
@@ -97,8 +102,7 @@ def main():
 
     synth = Synth()
     synth.start()
-    # synth.tune(0, 432, tuning=Tuning.TUNING_5_LIMIT)
-    synth.tune(0, 432)
+    synth.tune(CHANNEL, NOTE_A_FREQ, tuning=TUNING)
     # alternative sound font
     synth.setup_channel(channel=0, sound_font_path=SOUND_FONT, bank=SF_BANK, preset=SF_PRESET)
 

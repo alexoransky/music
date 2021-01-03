@@ -4,7 +4,6 @@ from .intervals import DiatonicInterval
 from .temperaments import TET12
 from .validate import validate_int
 
-tet12 = TET12()
 NOTE_A_FREQ_HZ = 440
 SUBSCRIPT_0 = 8320
 
@@ -50,13 +49,13 @@ class Note:
 
         self.names = [self.validate_name(name)]
         self.octave = validate_int(octave, -1, 9)
-        self.number = 12*(self.octave+1) + tet12.note_to_number(self.names[0])
+        self.number = 12*(self.octave+1) + TET12.note_to_number(self.names[0])
 
     def _create_from_midi(self, midi_number: int, suggested_root: str = None):
         if midi_number < 0:
             return
 
-        self.names = tet12.number_to_note(midi_number % 12)
+        self.names = TET12.number_to_note(midi_number % 12)
         self.octave = midi_number//12 - 1
         self.number = midi_number
         if suggested_root is not None:
@@ -94,7 +93,7 @@ class Note:
     @classmethod
     def midi_number_to_note_name(cls, midi_number):
         # returns note name with no flats (C4, C♯4 and so on)
-        name = tet12.number_to_note(midi_number % 12)[0]
+        name = TET12.number_to_note(midi_number % 12)[0]
         octave = midi_number//12 - 1
         if octave > -1:
             octave_chr = chr(SUBSCRIPT_0 + octave)
@@ -107,7 +106,7 @@ class Note:
     def note_name_to_midi_number(cls, note_name):
         octave = note_name[-1:]
         name = cls.validate_name(note_name[:-1])
-        return (int(octave) + 1) * 12 + tet12.note_to_number(name)
+        return (int(octave) + 1) * 12 + TET12.note_to_number(name)
 
     @classmethod
     def note_name_to_freq_hz(cls, note_name, note_a_freq_hz=440.0):
