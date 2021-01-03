@@ -13,11 +13,25 @@ else:
     PORT_OUT = "FLUID Synth"
 
 # Alternative sound font, bank and preset
-SOUND_FONT = "data/OmegaGMGS2.sf2"
-SF_BANK = 128
-SF_PRESET = 56
-#SF_PRESET = 4
+#SOUND_FONT = "../data/OmegaGMGS2.sf2"
+#
+# Stereo Standart
+# SF_BANK = 128
+# SF_PRESET = 4
+#
+# SFX
+# SF_BANK = 128
+# SF_PRESET = 56
+#
+# Sine Wave XG
+# SF_BANK = 66
+# SF_PRESET = 80
 
+
+SOUND_FONT = "../data/20-synth-sf/Perfect Sine.sf2"
+# SOUND_FONT = "../data/Sine Wave.sf2"
+SF_BANK = 0
+SF_PRESET = 0
 
 synth = None
 midi_router = None
@@ -83,9 +97,10 @@ def main():
 
     synth = Synth()
     synth.start()
-    synth.tune(0, 432, tuning=Tuning.TUNING_5_LIMIT)
+    # synth.tune(0, 432, tuning=Tuning.TUNING_5_LIMIT)
+    synth.tune(0, 432)
     # alternative sound font
-    # synth.setup_channel(channel=0, sound_font_path=SOUND_FONT, bank=SF_BANK, preset=SF_PRESET)
+    synth.setup_channel(channel=0, sound_font_path=SOUND_FONT, bank=SF_BANK, preset=SF_PRESET)
 
     if not init_midi_router():
         return False

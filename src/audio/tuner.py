@@ -23,9 +23,11 @@ class Tuner:
         SAMPLES_PER_FRAME = 2 * 1024
         FREQ_STEP = 0.1
 
-    def __init__(self, device, freq_range, samples_per_frame=SAMPLES_PER_FRAME, freq_step=FREQ_STEP):
+    def __init__(self, device, freq_range, samples_per_frame=SAMPLES_PER_FRAME, freq_step=FREQ_STEP,
+                 note_a_freq_hz=440.0):
         self.freq_range = freq_range
         self.threshold = Tuner.THRESHOLD_DB
+        self.note_a_freq_hz = note_a_freq_hz
 
         self.samples_per_frame = samples_per_frame
 
@@ -83,6 +85,7 @@ class Tuner:
         nf = 0.0
         start_time = time.time()
         state = 0
+        print("Note A4 freq: {:5.2f} Hz".format(self.note_a_freq_hz))
         print("Sampling at {} Hz with max resolution of {:5.2f} Hz".format(self.transform.sample_rate,
                                                                            self.transform.freq_step))
         print("\rInitializing...", end="")
@@ -110,8 +113,8 @@ class Tuner:
                 if peak_freq is None:
                     continue
 
-                midi_num = Note.freq_to_midi_number(peak_freq)
-                f0, _, _ = Note.midi_number_to_freq_hz(midi_num)
+                midi_num = Note.freq_to_midi_number(peak_freq, note_a_freq_hz=self.note_a_freq_hz)
+                f0, _, _ = Note.midi_number_to_freq_hz(midi_num, note_a_freq_hz=self.note_a_freq_hz)
                 note = Note.midi_number_to_note_name(midi_num)
 
                 err_str = ""
