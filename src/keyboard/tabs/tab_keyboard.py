@@ -29,6 +29,17 @@ WHITE_KEY_COLOR = Qt.lightGray
 BLACK_KEY_COLOR = Qt.black
 
 
+KEYBOARD_KEY_TO_NOTE_NAME = {
+    Qt.Key_Q: "C",
+    Qt.Key_W: "D",
+    Qt.Key_E: "E",
+    Qt.Key_R: "F",
+    Qt.Key_T: "G",
+    Qt.Key_Y: "A",
+    Qt.Key_U: "B"
+}
+
+
 class Keyboard(Tab):
     def __init__(self, ui, tab, config, log_fn=print):
         super().__init__(ui, tab, config, enable_timer=True, log_fn=log_fn)
@@ -40,6 +51,7 @@ class Keyboard(Tab):
         self.notes = set()
 
         self.keyboard_widget = KeyboardWidget(config.key_count, config.start_note, config.show_labels, parent=ui.widget_keyboard)
+        self.keyboard_widget.setFocus()
 
         # start MIDI
         self.audio = AudioSupport()
@@ -119,8 +131,11 @@ class KeyboardWidget(QGraphicsView):
         self.white_key_height = 0
         self.black_key_height = 0
 
+        # mouse and keyboards input
         self.key_press_fn = None
         self.key_pressed_with_mouse = None
+        self.key_pressed_with_key = set()
+        self.key_octave = 4
 
     def init_ui(self, max_w, max_h):
         self.widget.move(0, max_h * 0.5)
@@ -339,6 +354,59 @@ class KeyboardWidget(QGraphicsView):
 
         self.key_pressed_with_mouse = found
         self.key_press_fn(self._idx_to_midi_note(found), True)
+
+    def keyPressEvent(self, event):
+        key = event.key()
+
+        if key in range(Qt.Key_0, Qt.Key_9):
+            self.key_octave = key-Qt.Key_0
+            return
+
+        # TODO: Octave -1 not seem to work
+        if key == Qt.Key_Minus:
+            self.key_octave = -1
+            return
+
+        if key not in KEYBOARD_KEY_TO_NOTE_NAME.keys():
+            super().keyPressEvent(event)
+            return
+
+        if event.isAutoRepeat():
+            return
+
+        if key in self.key_pressed_with_key:
+            return
+        self.key_pressed_with_key.add(key)
+
+        note = KEYBOARD_KEY_TO_NOTE_NAME[key]
+        if key not in [Qt.Key_B, Qt.Key_E]:
+            if event.modifiers() == Qt.ShiftModifier:
+                note += "#"
+        note += str(self.key_octave)
+        self.key_press_fn(Note.note_name_to_midi_number(note), True)
+
+    def keyReleaseEvent(self, event):
+        key = event.key()
+
+        if key not in KEYBOARD_KEY_TO_NOTE_NAME.keys():
+            super().keyPressEvent(event)
+            return
+
+        if key not in self.key_pressed_with_key:
+            super().keyPressEvent(event)
+            return
+
+        if event.isAutoRepeat():
+            return
+
+        note = KEYBOARD_KEY_TO_NOTE_NAME[key]
+        if key not in [Qt.Key_B, Qt.Key_E]:
+            if event.modifiers() == Qt.ShiftModifier:
+                note += "#"
+        note += str(self.key_octave)
+        self.key_press_fn(Note.note_name_to_midi_number(note), False)
+
+        self.key_pressed_with_key.remove(key)
 
 
 class KeyWidget(QGraphicsRectItem):
