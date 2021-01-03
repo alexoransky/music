@@ -117,6 +117,7 @@ class KeyboardWidget(QGraphicsView):
         self.black_key_height = 0
 
         self.key_press_fn = None
+        self.key_pressed_with_mouse = None
 
     def init_ui(self, max_w, max_h):
         self.widget.move(0, max_h * 0.5)
@@ -304,17 +305,35 @@ class KeyboardWidget(QGraphicsView):
             super().mousePressEvent(event)
             return
 
-        note = self._idx_to_midi_note(found)
-        self.key_press_fn(note, True)
+        self.key_pressed_with_mouse = found
+        self.key_press_fn(self._idx_to_midi_note(found), True)
 
     def mouseReleaseEvent(self, event):
+        self.key_pressed_with_mouse = None
+
         found = self._mouse_pos_to_idx(event.pos())
         if found is None:
             super().mouseReleaseEvent(event)
             return
 
-        note = self._idx_to_midi_note(found)
-        self.key_press_fn(note, False)
+        self.key_press_fn(self._idx_to_midi_note(found), False)
+
+    def mouseMoveEvent(self, event):
+        found = None
+        if event.buttons() == Qt.LeftButton:
+            found = self._mouse_pos_to_idx(event.pos())
+        if found is None:
+            super().mouseMoveEvent(event)
+            return
+
+        if self.key_pressed_with_mouse == found:
+            super().mouseMoveEvent(event)
+            return
+
+        self.key_press_fn(self._idx_to_midi_note(self.key_pressed_with_mouse), False)
+
+        self.key_pressed_with_mouse = found
+        self.key_press_fn(self._idx_to_midi_note(found), True)
 
 
 class KeyWidget(QGraphicsRectItem):
