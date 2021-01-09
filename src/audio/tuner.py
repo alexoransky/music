@@ -7,6 +7,24 @@ from transforms import STFT, CZT
 from theory import Note
 import time
 from threading import Thread
+from dataclasses import dataclass
+
+
+@dataclass
+class TunerData:
+    noise_floor: int = 0
+    midi_num: int = 0
+    note: str = ""
+    curr_freq: float = 0.0
+    delta_freq: float = 0.0
+    state: int = 0
+    queue_size: int = 0
+
+
+@dataclass
+class TunerErrors:
+    queue: int = 0
+    sample: int = 0
 
 
 class Tuner:
@@ -23,9 +41,10 @@ class Tuner:
         SAMPLES_PER_FRAME = 2 * 1024
         FREQ_STEP = 0.1
 
-    def __init__(self, device, freq_range, samples_per_frame=SAMPLES_PER_FRAME, freq_step=FREQ_STEP,
+    def __init__(self, device, note_range, samples_per_frame=SAMPLES_PER_FRAME, freq_step=FREQ_STEP,
                  note_a_freq_hz=440.0):
-        self.freq_range = freq_range
+
+        self.freq_range = Tuner.get_freq_range(note_range, note_a_freq_hz)
         self.threshold = Tuner.THRESHOLD_DB
         self.note_a_freq_hz = note_a_freq_hz
 
@@ -42,7 +61,7 @@ class Tuner:
             self.transform = STFT(self.sample_rate, samples_per_frame=self.samples_per_frame,
                                   frames_per_fft=Tuner.FRAMES_PER_FFT)
         else:
-            self.transform = CZT(self.sample_rate, samples_per_frame=self.samples_per_frame, freq_range=freq_range,
+            self.transform = CZT(self.sample_rate, samples_per_frame=self.samples_per_frame, freq_range=self.freq_range,
                                  freq_step=freq_step)
 
         self.bin_range = (self.transform.freq_to_bin(self.freq_range[0]),
@@ -50,6 +69,15 @@ class Tuner:
 
         self._active = False
         self._thread = None
+
+        self.data = TunerData()
+        self.errors = TunerErrors()
+
+    @classmethod
+    def get_freq_range(cls, note_range, note_a_freq_hz):
+        f1 = Note.note_name_to_freq_hz(note_range[0], note_a_freq_hz=note_a_freq_hz)
+        f2 = Note.note_name_to_freq_hz(note_range[1], note_a_freq_hz=note_a_freq_hz)
+        return f1[0], f2[0]
 
     def start(self):
         if not self.device.data_is_queued():
@@ -65,51 +93,27 @@ class Tuner:
         self._thread.join()
 
     def _main_loop(self):
-        def error_str():
-            s = ""
-            qsize = self.device.queue_size()
-            qerrors = self.device.queue_error_cnt
-            if qsize > 1:
-                s = f"Q:{qsize} "
-            if qerrors > 0:
-                s = f"Q:{qsize} QE:{qerrors} "
-
-            serrors = self.device.sample_error_cnt
-            if serrors > 0:
-                s += f"SE:{serrors}"
-
-            if len(s):
-                s = "[" + s.rstrip() + "]"
-            return s
-
-        nf = 0.0
         start_time = time.time()
-        state = 0
-        print("Note A4 freq: {:5.2f} Hz".format(self.note_a_freq_hz))
-        print("Sampling at {} Hz with max resolution of {:5.2f} Hz".format(self.transform.sample_rate,
-                                                                           self.transform.freq_step))
-        print("\rInitializing...", end="")
 
         while True:
             if not self._active:
                 continue
 
-            if state == 0:
+            if self.data.state == 0:
                 curr_time = time.time()
                 if (curr_time - start_time) > Tuner.INIT_TIME_S:
-                    if Tuner.DEBUG_OUTPUT:
-                        print(f"\rNF={nf}             ")
-                    print("\r                                        ", end="")
-                    state = 1
+                    self.data.state = 1
+                    self.on_state_change()
+                    continue
 
             if self.device.data_is_queued():
                 data = self.device.get_data()
 
-            if state == 0:
-                nf = self._determine_noise_floor(data, nf)
+            if self.data.state == 0:
+                self._determine_noise_floor(data)
 
-            if state == 1:
-                peak_freq = self._process_data(data, nf)
+            if self.data.state == 1:
+                peak_freq = self._process_data(data)
                 if peak_freq is None:
                     continue
 
@@ -117,26 +121,29 @@ class Tuner:
                 f0, _, _ = Note.midi_number_to_freq_hz(midi_num, note_a_freq_hz=self.note_a_freq_hz)
                 note = Note.midi_number_to_note_name(midi_num)
 
-                err_str = ""
-                if Tuner.DEBUG_OUTPUT:
-                    err_str = error_str()
+                self.data.queue_size = self.device.queue_size()
+                self.errors.queue = self.device.queue_error_cnt
+                self.errors.sample = self.device.sample_error_cnt
 
-                print("\r                                                  ", end="")
-                print("\r{}  {:7.2f} Hz {:+.2f} Hz  {}".format(note, peak_freq, peak_freq - f0, err_str), end="")
+                self.data.note = note
+                self.data.midi_num = midi_num
+                self.data.curr_freq = peak_freq
+                self.data.delta_freq = peak_freq - f0
 
-    def _determine_noise_floor(self, data, nf):
+            self.on_update()
+
+    def _determine_noise_floor(self, data):
         if data is None:
-            return nf
+            return
 
         spectrum = self.transform.process(data)
         if spectrum is None:
-            return nf
+            return
 
         clipped = spectrum[self.bin_range[0]:self.bin_range[1]]
-        nf = max(nf, np.average(clipped))
-        return nf
+        self.data.noise_floor = max(self.data.noise_floor, np.average(clipped))
 
-    def _process_data(self, data, nf=0):
+    def _process_data(self, data):
         if data is None:
             return None
 
@@ -147,8 +154,8 @@ class Tuner:
         clipped = spectrum[self.bin_range[0]:self.bin_range[1]]
         max_val = np.amax(clipped)
 
-        if nf > 0:
-            db = 20 * np.log10(max_val / nf)
+        if self.data.noise_floor > 0:
+            db = 20 * np.log10(max_val / self.data.noise_floor)
             if db < self.threshold:
                 return None
         else:
@@ -158,3 +165,9 @@ class Tuner:
         peak_bin = clipped.argmax() + self.bin_range[0]
         peak_freq = self.transform.bin_to_freq(peak_bin)
         return peak_freq
+
+    def on_state_change(self):
+        pass
+
+    def on_update(self):
+        pass
