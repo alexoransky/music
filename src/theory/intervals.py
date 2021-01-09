@@ -30,7 +30,8 @@ class Interval:
                     "P8": 12,
                     "A7": 12,
                     "T": 2,
-                    "S": 1}
+                    "S": 1,
+                    "3": 3}
 
     def __init__(self, name):
         self.name = None

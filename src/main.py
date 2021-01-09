@@ -1,6 +1,7 @@
 from termcolor import cprint
 from theory.chords import Chord
 from audio.synth import Synth
+from theory.scales import HeptatonicScale, PentatonicScale
 
 
 def play_notes(synth, notes, chord=False):
@@ -27,13 +28,35 @@ if __name__ == "__main__":
     synth = Synth()
     synth.start()
 
-    # play_scale(synth, HeptatonicScale("C", "major"))
+    # https: // www.basicmusictheory.com / f - minor - pentatonic - scale
+
+    # play_scale(synth, PentatonicScale("A", "natural minor"))
+    play_scale(synth, PentatonicScale("E", "natural minor"))
+    play_scale(synth, HeptatonicScale("E", "minor"))
+    # play_scale(synth, PentatonicScale("B", "natural minor"))
+    # play_scale(synth, PentatonicScale("F#", "natural minor"))
+    # play_scale(synth, PentatonicScale("C#", "natural minor"))
+    # play_scale(synth, PentatonicScale("G#", "natural minor"))
+    # play_scale(synth, PentatonicScale("D#", "natural minor"))
+    # play_scale(synth, PentatonicScale("A#", "natural minor"))
+    # play_scale(synth, PentatonicScale("D", "natural minor"))
+    play_scale(synth, PentatonicScale("G", "natural minor"))
+    play_scale(synth, HeptatonicScale("G", "minor"))
+    # play_scale(synth, PentatonicScale("C", "natural minor"))
+    # play_scale(synth, PentatonicScale("F", "natural minor"))
+    # play_scale(synth, PentatonicScale("Bb", "natural minor"))
+    # play_scale(synth, PentatonicScale("Eb", "natural minor"))
+    play_scale(synth, PentatonicScale("Ab", "natural minor"))    # TODO: generates Cb, should be B
+    play_scale(synth, HeptatonicScale("Ab", "minor"))
+
+    play_scale(synth, HeptatonicScale("C", "major"))
+    play_scale(synth, PentatonicScale("C", "major"))
+
     # play_scale(synth, HeptatonicScale("C", "phrygian"))
     # play_scale(synth, HeptatonicScale("C", "minor"))
     #
     # play_scale(synth, HeptatonicScale("G", "major"))
     # play_scale(synth, HeptatonicScale("G", "phrygian"))
-    # play_scale(synth, HeptatonicScale("G", "minor"))
     #
     # play_scale(synth, HeptatonicScale("D", "minor"))
     # play_scale(synth, HeptatonicScale("D", "dorian"))
@@ -64,10 +87,10 @@ if __name__ == "__main__":
     # play_chord(synth, ch_f)
     # play_chord(synth, ch_g)
 
-    ch_c4 = Chord("C", octave=5)
-    ch_c3 = Chord("C", octave=3)
-    play_chord(synth, ch_c4)
-    play_chord(synth, ch_c3)
-    play_notes(synth, ch_c3.notes + ch_c4.notes, chord=True)
+    # ch_c4 = Chord("C", octave=5)
+    # ch_c3 = Chord("C", octave=3)
+    # play_chord(synth, ch_c4)
+    # play_chord(synth, ch_c3)
+    # play_notes(synth, ch_c3.notes + ch_c4.notes, chord=True)
 
     synth.stop(delay_sec=1)

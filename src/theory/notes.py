@@ -91,15 +91,17 @@ class Note:
             self._name_idx = 0
 
     @classmethod
-    def midi_number_to_note_name(cls, midi_number):
+    def midi_number_to_note_name(cls, midi_number, use_subscript=True):
         # returns note name with no flats (C4, C♯4 and so on)
         name = TET12.number_to_note(midi_number % 12)[0]
         octave = midi_number//12 - 1
-        if octave > -1:
-            octave_chr = chr(SUBSCRIPT_0 + octave)
-        else:
-            # -1
-            octave_chr = chr(SUBSCRIPT_0 + 11) + chr(SUBSCRIPT_0 + abs(octave))
+        octave_chr = str(octave)
+        if use_subscript:
+            if octave > -1:
+                octave_chr = chr(SUBSCRIPT_0 + octave)
+            else:
+                # -1
+                octave_chr = chr(SUBSCRIPT_0 + 11) + chr(SUBSCRIPT_0 + abs(octave))
         return name + octave_chr
 
     @classmethod
