@@ -6,28 +6,42 @@ from theory.notes import Note
 
 DEVICE = 5
 
-GUITAR_RANGE = ("E2", "E4")
-UKULELE_TUNER_RANGE = ("C4", "A4")
-F2_C5_RANGE = ("F2", "C5")
-
 NF_WARNING_THRESHOLD = 0.6
 NF_ERROR_THRESHOLD = 1.0
 
+UKULELE_RANGE = ["C4", "A4"]
+UKULELE_NOTES = ["G4", "C4", "E4", "A4"]
+GUITAR_NOTES = ["E2", "A2", "D3", "G3", "B3", "E4"]
+USE_FREQ_INDICATOR = False
+DEBUG_OUTPUT = False
+
 
 class CLITuner(Tuner):
-    def __init__(self, note_range, note_a_freq_hz=440.0):
+    def __init__(self, note_range=None, note_list=None, note_a_freq_hz=440.0):
         self.freq_step = 0.2
-
         self.note_range = note_range
-        self.midi_range = (Note.note_name_to_midi_number(note_range[0]), Note.note_name_to_midi_number(note_range[1]))
+        self.note_list = note_list
+        self.midi_range = None
+        self.midi_list = None
 
-        self.tuner_note_range = self.get_tuner_range(note_range)
+        # redefine the note range based on the supplied note list
+        if self.note_list is not None:
+            self.midi_list = self.note_names_to_midi_numbers(self.note_list)
+            self.note_range = (Note.midi_number_to_note_name(self.midi_list[0], use_subscript=False),
+                               Note.midi_number_to_note_name(self.midi_list[-1], use_subscript=False))
+
+        self.midi_range = (Note.note_name_to_midi_number(self.note_range[0]),
+                           Note.note_name_to_midi_number(self.note_range[1]))
+
+        self.tuner_note_range = self.get_tuner_range(self.note_range)
         f1, f2 = Tuner.get_freq_range(self.tuner_note_range, note_a_freq_hz)
+        if f2/f1 < 2.5:
+            self.freq_step = 0.1
         if f1 > 1000:
             self.freq_step = 0.5
         samples_per_frame = int(math.ceil(2*(f2-f1) / self.freq_step / 1024) * 1024)
 
-        if Tuner.DEBUG_OUTPUT:
+        if DEBUG_OUTPUT:
             cprint(f"Note A4 freq: {note_a_freq_hz:5.2f} Hz", "blue")
             cprint(f"Freq resolution: {self.freq_step:5.2f} Hz  Samples per frame: {samples_per_frame}", "blue")
         cprint("\rInitializing...", "yellow", end="")
@@ -43,6 +57,12 @@ class CLITuner(Tuner):
         n2 = Note.midi_number_to_note_name(midi_2, use_subscript=False)
         return n1, n2
 
+    def note_names_to_midi_numbers(self, note_names):
+        midi = []
+        for n in note_names:
+            midi.append(Note.note_name_to_midi_number(n))
+        return sorted(midi)
+
     def on_state_change(self):
         if self.data.noise_floor > NF_ERROR_THRESHOLD:
             cprint(f"\rToo noisy! NF={self.data.noise_floor:.2f}", "red")
@@ -50,9 +70,23 @@ class CLITuner(Tuner):
             cprint(f"\rToo noisy! NF={self.data.noise_floor:.2f}", "yellow")
         print("\r                                        ", end="")
 
+    def find_midi(self, freq):
+        if self.note_list is None:
+            return None
+
+        curr_dist = 20000
+        found = None
+        for m in self.midi_list:
+            f0, _, _ = Note.midi_number_to_freq_hz(m, note_a_freq_hz=self.note_a_freq_hz)
+            dist = abs(f0-freq)
+            if dist < curr_dist:
+                found = m
+                curr_dist = dist
+        return found
+
     def on_update(self):
         def error_str():
-            if not Tuner.DEBUG_OUTPUT:
+            if not DEBUG_OUTPUT:
                 return ""
 
             s = ""
@@ -73,12 +107,32 @@ class CLITuner(Tuner):
                 s = colored(s, "red")
             return s
 
+        def scale(fsd, pos):
+            pos = min(max(pos, -fsd), fsd)
+            ticks = "╷" * (fsd-1)
+            s = "│" + ticks + "│" + ticks + "│"
+            idx = fsd + pos
+            ret = s[:idx] + "▼" + s[idx+1:]
+            return ret
+
         def note_str():
-            f0, f1, f2 = Note.midi_number_to_freq_hz(self.data.midi_num)
+            found_midi = self.find_midi(self.data.curr_freq)
+            if found_midi is None:
+                found_midi = self.data.midi_num
+                found_note = self.data.note
+            else:
+                found_note = Note.midi_number_to_note_name(found_midi)
+
+            f0, f1, f2 = Note.midi_number_to_freq_hz(found_midi)
             f1r = (f0 + f1) / 2
             f2r = (f0 + f2) / 2
             f1y = (f0 + f1r) / 2
             f2y = (f0 + f2r) / 2
+            delta_freq = self.data.curr_freq - f0
+
+            fr = f2-f1
+            n = 5
+            pos = round(n*delta_freq/fr)
 
             color = "green"
             if not (f1y < self.data.curr_freq < f2y):
@@ -86,28 +140,34 @@ class CLITuner(Tuner):
             if not (f1r < self.data.curr_freq < f2r):
                 color = "red"
 
-            s = f"{self.data.note} {self.data.delta_freq:+.2f} Hz"
+            if USE_FREQ_INDICATOR:
+                s = f"{found_note} {delta_freq:+.2f} Hz"
+            else:
+                s = f"{found_note} {scale(n, pos)}"
             s = colored(s, color)
+            s += f"  [{self.data.curr_freq:7.2f} Hz]"
 
-            if self.data.midi_num < self.midi_range[0]:
-                color = "red"
-                s = f"{self.note_range[0]}  Too low!"
-                s = colored(s, color)
+            if self.note_list is None:
+                if self.data.midi_num < self.midi_range[0]:
+                    color = "red"
+                    s = f"{self.note_range[0]}  Too low!"
+                    s = colored(s, color)
 
-            if self.data.midi_num > self.midi_range[1]:
-                color = "red"
-                s = f"{self.note_range[1]}  Too high!"
-                s = colored(s, color)
+                if self.data.midi_num > self.midi_range[1]:
+                    color = "red"
+                    s = f"{self.note_range[1]}  Too high!"
+                    s = colored(s, color)
 
             return s
 
         if tuner.data.state == 1:
             print("\r                                                  ", end="")
-            cprint(f"\r{note_str()}  [{self.data.curr_freq:7.2f} Hz]  {error_str()}", end="")
+            cprint(f"\r{note_str()}  {error_str()}", end="")
 
 
 if __name__ == "__main__":
     # print(SDInputDevice.available_devices())
-    # tuner = CLITuner(GUITAR_RANGE)
-    tuner = CLITuner(UKULELE_TUNER_RANGE)
+    # tuner = CLITuner(note_range=UKULELE_RANGE)
+    tuner = CLITuner(note_list=UKULELE_NOTES)
+    # tuner = CLITuner(note_list=GUITAR_NOTES)
     tuner.start()

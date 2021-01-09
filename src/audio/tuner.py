@@ -29,11 +29,10 @@ class TunerErrors:
 
 class Tuner:
     INIT_TIME_S = 2
-    DEBUG_OUTPUT = True
-
     THRESHOLD_DB = 25
     USE_SD = True
     USE_STFT = False
+
     if USE_STFT:
         SAMPLES_PER_FRAME = 2 * 1024
         FRAMES_PER_FFT = 16
