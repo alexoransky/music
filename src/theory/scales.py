@@ -25,6 +25,12 @@ class Scale:
     def __str__(self):
         return self.type()
 
+    def name(self):
+        return self.root.name() + " " + self.mode_name
+
+    def note_names(self):
+        return " ".join([x.name() for x in self.notes])
+
 
 class HeptatonicScale(Scale):
     DIATONIC_INTERVALS = {
@@ -47,7 +53,7 @@ class HeptatonicScale(Scale):
         _mode = mode
         if mode.lower() == "major" or mode == "":
             _mode = "ionian"
-        if mode.lower() == "minor":
+        if mode.lower() == "minor" or mode.lower() == "natural minor":
             _mode = "aeolian"
         self.mode = self._validate_mode(_mode)
         if self.mode is None:
@@ -99,20 +105,28 @@ class PentatonicScale(Scale):
         _mode = mode
         if mode.lower() == "major" or mode == "":
             _mode = "ionian"
-            extra_notes = (4, 7)
         if mode.lower() == "egyptian":
             _mode = "dorian"
-            extra_notes = (3, 6)
         if mode.lower() == "blues minor":
             _mode = "phrygian"
-            extra_notes = (2, 5)
         if mode.lower() == "blues major":
             _mode = "mixolydian"
-            extra_notes = (3, 7)
         if mode.lower() == "natural minor":
             _mode = "aeolian"
-            extra_notes = (2, 6)
         self.mode = self._validate_mode(_mode)
+
+        extra_notes = None
+        if self.mode == "ionian":
+            extra_notes = (4, 7)
+        if self.mode == "dorian":
+            extra_notes = (3, 6)
+        if self.mode == "phrygian":
+            extra_notes = (2, 5)
+        if self.mode == "mixolydian":
+            extra_notes = (3, 7)
+        if self.mode == "aeolian":
+            extra_notes = (2, 6)
+
         if self.mode is None:
             self.mode_name = "unknown"
             return
