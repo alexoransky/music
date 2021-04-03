@@ -49,7 +49,11 @@ class Note:
 
         self.names = [self.validate_name(name)]
         self.octave = validate_int(octave, -1, 9)
-        self.number = 12*(self.octave+1) + TET12.note_to_number(self.names[0])
+        self.number = None
+        try:
+            self.number = 12*(self.octave+1) + TET12.note_to_number(self.names[0])
+        except:
+            pass
 
     def _create_from_midi(self, midi_number: int, suggested_root: str = None):
         if midi_number < 0:
@@ -163,7 +167,10 @@ class Note:
         if isinstance(interval, str):
             cnt = DiatonicInterval.SEMITONE_CNT[interval]
             degrees = DiatonicInterval(interval).degrees() - 1
-            new_idx = (self.NOTES[self.name()[0]] + degrees) % len(self.NOTES)
+            try:
+                new_idx = (self.NOTES[self.name()[0]] + degrees) % len(self.NOTES)
+            except:
+                return None
             root = list(self.NOTES.keys())[new_idx]
 
         if cnt is None:
