@@ -79,7 +79,7 @@ class Chord:
     }
 
     def __init__(self, chord_name: str = "", octave=4):
-        chord = self._validate_name(chord_name)
+        chord = Chord.validate_name(chord_name)
         self.chord_name = chord["name"]
         self.over = chord["over"]
         self.root = Note(name=chord["root"], octave=octave)
@@ -117,7 +117,8 @@ class Chord:
 
         return lst
 
-    def _validate_name(self, name):
+    @classmethod
+    def validate_name(cls, name):
         # <NoteAcc><Chord>[/<NoteAcc>]
 
         ret = {"root": "",
@@ -143,11 +144,11 @@ class Chord:
                 next_idx += len(a)
 
         c = name[next_idx:].strip()
-        if c not in self.CHORDS.keys():
+        if c not in Chord.CHORDS.keys():
             return ret
 
         ret["root"] = root_name
-        ret["name"] = self.CHORDS[c]
+        ret["name"] = Chord.CHORDS[c]
         if inv != "":
             ret["over"] = Note.validate_name(inv)
 
@@ -172,4 +173,11 @@ class Chord:
                 signature += str(cnt)
             ret[signature] = chord
 
+        return ret
+
+    def note_names(self):
+        try:
+            ret = [n.name() for n in self.notes]
+        except:
+            return []
         return ret
