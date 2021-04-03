@@ -8,6 +8,7 @@ from theory import Note
 import time
 from threading import Thread
 from dataclasses import dataclass
+from typing import Tuple
 
 
 @dataclass
@@ -40,10 +41,11 @@ class Tuner:
         SAMPLES_PER_FRAME = 2 * 1024
         FREQ_STEP = 0.1
 
-    def __init__(self, device, note_range, samples_per_frame=SAMPLES_PER_FRAME, freq_step=FREQ_STEP,
-                 note_a_freq_hz=440.0):
+    def __init__(self, device: int, note_range: Tuple[str, str],
+                 samples_per_frame: int=SAMPLES_PER_FRAME, freq_step: float=FREQ_STEP,
+                 note_a_freq_hz: float=440.0):
 
-        self.freq_range = Tuner.get_freq_range(note_range, note_a_freq_hz)
+        self.freq_range = Tuner. get_freq_range(note_range, note_a_freq_hz)
         self.threshold = Tuner.THRESHOLD_DB
         self.note_a_freq_hz = note_a_freq_hz
 

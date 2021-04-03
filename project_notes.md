@@ -12,7 +12,7 @@ Both synths work with Sound Font SF2 instrument sample files.
 Polyphone tool can be used to edit files:
 https://www.polyphone-soundfonts.com/download
 
-Basically, the music theory part that is needed is described in wikipedia: 
+Basically, the music theory part that is needed is described in wikipedia:
 
 https://en.wikipedia.org/wiki/Semitone#Minor_second
 https://en.wikipedia.org/wiki/Just_intonation
@@ -36,7 +36,7 @@ http://www.fluidsynth.org/api/index.html
 FLuidSynth starts with many warning messages on Arch Linux.  However, it does not seem to affect anything.
 Here is the command to use ALSA:
   fluidsynth -is -a alsa -m alsa_seq -r 48000 /usr/share/soundfonts/FluidR3_GM.sf2
-  
+
 ALSA lib pcm_dsnoop.c:641:(snd_pcm_dsnoop_open) unable to open slave
 ALSA lib pcm_dmix.c:1089:(snd_pcm_dmix_open) unable to open slave
 ALSA lib pcm.c:2642:(snd_pcm_open_noupdate) Unknown PCM cards.pcm.rear
@@ -58,7 +58,7 @@ Copyright (C) 2000-2020 Peter Hanappe and others.
 Distributed under the LGPL license.
 SoundFont(R) is a registered trademark of E-mu Systems, Inc.
 fluidsynth: warning: Failed to set thread to high priority
-fluidsynth: warning: Failed to set thread to high priority 
+fluidsynth: warning: Failed to set thread to high priority
 
 Sometimes an update to alsa-lib breaks the FS imterface, refer to notes from 06/13/2020 on how to fix the issue.
 
@@ -211,10 +211,10 @@ Added a simple MIDI router to the GUI app.
 LilyPond is program to convert text based muisic score file to sheet music.
 It provides a de-facto standard file format (.ly) thaqt allows for specifying complex music pieces.
 My idea is to use .ly files to play music using FluidSynth.
-I will have to convert my scietific pitch notation (c#3) to Helmholz-like pitch notation (cis') 
+I will have to convert my scietific pitch notation (c#3) to Helmholz-like pitch notation (cis')
 in order to use those files.
 
-Lilypond generates a MIDI file, so that can be used to play the music. 
+Lilypond generates a MIDI file, so that can be used to play the music.
 There is python-ly project to read the music from .ly files into Python data structures.
 
 05/26/2020
@@ -232,7 +232,7 @@ between threads even for type 1 files.
 
 05/31/2020
 ----------
-Today, I have added an ability add play a fragment of the file (from any note to any note) 
+Today, I have added an ability add play a fragment of the file (from any note to any note)
 to the MIDIFilePlayer.
 
 06/03/2020
@@ -244,9 +244,9 @@ Reworked the player to use a simple state machine.
 Started working on a metronome function.  The metronome click and bell sounds are MIDI notes 33 and 34 and
 defined are in General MIDI Level 2:
 https://soundprogramming.net/file-formats/general-midi-drum-note-numbers/
-It turns out that not many sound fonts actually have those. They are in this sound font made by Rick Simon, 
+It turns out that not many sound fonts actually have those. They are in this sound font made by Rick Simon,
 in bank 128, preset 0 (127:000) but (128:004) seems to sound better.
-Note that 128:056 with notes 45 and 46 sounds even better. 
+Note that 128:056 with notes 45 and 46 sounds even better.
 https://musescore.org/en/node/109371
 
 In order to explore and edit sound fonts, I installed Polyphone tool:
@@ -334,7 +334,7 @@ In my case it was an update from Qt 5.15.0 to 5.15.1.
 This is resolved by updating qt5-styleplugins, although it might take a few days.  Also, the tool does not store the config, henerates a sigfault.
 
 For the project, added display of notes and chords that are being played.
-  
+
 12/14/2020
 ----------
 Got back to the project after a long break- was busy at work. Also, had to reinstall the system.
@@ -370,7 +370,7 @@ Spent couple days exploring FFT options and building the tuner.
 The idea is to have an FFT that produces a list of frequencies and magnitudes that
 would be suitable for working with the tuner and the chord recognizer.
 
-The FFT class so far uses a short FFT algorithm, numpy, scipy and sounddevice APIs. 
+The FFT class so far uses a short FFT algorithm, numpy, scipy and sounddevice APIs.
 
 There is a second solution that uses a short time FT algorithm, numpy and pyaudio:
 https://mzucker.github.io/2016/08/07/ukulele-tuner.html
@@ -392,10 +392,10 @@ Added separate classes for input devices that are based on SoundDevice and PyAud
 
 12/26/2020
 ----------
-Yesterday was looking for ways to not waste time to do FFT on the spectrum above 5 KHz. 
+Yesterday was looking for ways to not waste time to do FFT on the spectrum above 5 KHz.
 75% of the sonic spectrum is not needed for music anyway and DFT requires all samples to provide
 desired frequency resolution and, therefore, slow.  
-Found Chirp Z-transform (CZT) algorithm.  The CZT allows to "zoom-in" on a specific frequency band 
+Found Chirp Z-transform (CZT) algorithm.  The CZT allows to "zoom-in" on a specific frequency band
 and not to process the rest:
 https://pypi.org/project/czt/
 https://github.com/garrettj403/CZT/
@@ -417,14 +417,14 @@ Rabiner, L., Schafer, R., Rader, C. The Chirp z-Transform Algorithm. IEEE Trans.
 https://web.ece.ucsb.edu/Faculty/Rabiner/ece259/Reprints/015_czt.pdf
 
 Also, for the mathematics of the fast inverse CZT, see:
-Sukhoy, V., Stoytchev, A. Generalizing the inverse FFT off the unit circle. Sci Rep 9, 14443 (2019). 
+Sukhoy, V., Stoytchev, A. Generalizing the inverse FFT off the unit circle. Sci Rep 9, 14443 (2019).
 https://doi.org/10.1038/s41598-019-50234-9
 
 I also started looking into usage of PyFFTW.  There are two things to worry about:
 1. License is GPL.
 2. There is no real gain in speed even when using PyFFTW interfaces with enabled cache etc.
 
-I am not going to use PyFFTW, at least for now. 
+I am not going to use PyFFTW, at least for now.
 If PyFFTW really needed, it can be added into the transform code:
 
 ```
@@ -443,9 +443,63 @@ If PyFFTW really needed, it can be added into the transform code:
 
 I have worked on the code a bit more and moved the listening thread into its own process.
 The speed improved 4x compared to the threading application.
-it seems that it is sufficient to have 2K (2,048) samples to resolve frequencies of the big 
+it seems that it is sufficient to have 2K (2,048) samples to resolve frequencies of the big
 part of 4th octave down to 0.2 Hz - notes C4 to A4.  The bandwidth in question is 200 Hz.
 The sampling rate of the mic is 48,000 Hz.
 The tuner is pretty responsive- 2048 out of 48000 gives 43.7 ms worth of samples.
 I tried to make it faster- 1024 sample with the frequency resolution of 0.4 Hz, but the results
-are all over the place. 
+are all over the place.
+
+For tuning, found charts for A4 notes of different frequencies:
+https://pages.mtu.edu/~suits/notefreq432.html
+
+Started looking at the analysis of the audio spectrum at a logarithmic scale.
+The problem with STFT and CZT is that for lower octaves, frequency resolution of 0.1 Hz to 1 Hz is required,
+while for higher octaves, 1 Hz resolution is a complete waste of time and 100 Hz steps are preferred.
+STFT takes significant time to get the desired resolution for the entire range of frequencies while CZT
+must be run once per octave to get the desired resolution.
+As a result, for applications such as a guitar tuner, the CZT is a great choice because the
+entire range is 200 to 500 Hz. Not so for chord recognition or other real-time music analysis.
+
+Constant Q Transform was designed to solve the "logarithmic FFT" problem.
+An interesting diploma thesis was found for Constant Q Transform (CQT):
+https://iem.kug.ac.at/fileadmin/media/iem/projects/2011/schoerkhuber.pdf
+http://academics.wellesley.edu/Physics/brown/pubs/cq1stPaper.pdf
+
+librosa Python library implements the CQT platform:
+https://librosa.org/doc/latest/core.html
+
+Other implementations:
+https://github.com/scoreur/cqt/blob/master/cqt.py
+https://github.com/iphysresearch/CQT_toolbox_python
+https://github.com/bmcfee/pumpp/blob/master/pumpp/feature/cqt.py
+
+01/06/2021
+----------
+It seems that the tuner can have a few improvements:
+1. Check itself with having fluid synth play notes with pure sine waves.
+2. Select the frequency step and number of samples per frame based on the frequency range.
+3. Identify tolerances on both low and high ends of the range, i.e. 0.5 Hz and 1 Hz.
+4. Display the type of the tuner and notes for each string.
+5. Use colors to display in tune/too low/too high conditions.
+6. Have a GUI.
+
+01/10/2021
+----------
+Items 2, 3, 5 from the list above are done.
+
+01/18/2021
+----------
+Added scale finder app.  The app allows to find all scales that have the provided notes and/or chords.
+For instance, Cm and Dm chords belong to.
+
+3/22/2021
+---------
+
+Back to the CQT, found the following study:
+https://www.univie.ac.at/nonstatgab/pdf_files/dogrhove12_amsart.pdf
+
+3/28/2021
+---------
+
+Switched to Python 3.9.2.

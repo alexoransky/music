@@ -3,6 +3,7 @@ from termcolor import cprint, colored
 from audio.input_device import SDInputDevice
 from audio.tuner import Tuner
 from theory.notes import Note
+from typing import Tuple, List
 
 DEVICE = 5
 
@@ -10,14 +11,15 @@ NF_WARNING_THRESHOLD = 0.6
 NF_ERROR_THRESHOLD = 1.0
 
 UKULELE_RANGE = ["C4", "A4"]
+GUITAR_RANGE = ["E2", "D6"]
 UKULELE_NOTES = ["G4", "C4", "E4", "A4"]
 GUITAR_NOTES = ["E2", "A2", "D3", "G3", "B3", "E4"]
 USE_FREQ_INDICATOR = False
 DEBUG_OUTPUT = False
 
 
-class CLITuner(Tuner):
-    def __init__(self, note_range=None, note_list=None, note_a_freq_hz=440.0):
+class CLTuner(Tuner):
+    def __init__(self, note_range: Tuple[str, str]=None, note_list: List[str]=None, note_a_freq_hz: float=440.0):
         self.freq_step = 0.2
         self.note_range = note_range
         self.note_list = note_list
@@ -107,11 +109,13 @@ class CLITuner(Tuner):
                 s = colored(s, "red")
             return s
 
-        def scale(fsd, pos):
+        def scale(fsd, curr, vc, minv, maxv):
+            pos = round(fsd * (curr-vc) / (maxv - minv))
             pos = min(max(pos, -fsd), fsd)
+
             ticks = "╷" * (fsd-1)
             s = "│" + ticks + "│" + ticks + "│"
-            idx = fsd + pos
+            idx = int(fsd + pos)
             ret = s[:idx] + "▼" + s[idx+1:]
             return ret
 
@@ -130,10 +134,6 @@ class CLITuner(Tuner):
             f2y = (f0 + f2r) / 2
             delta_freq = self.data.curr_freq - f0
 
-            fr = f2-f1
-            n = 5
-            pos = round(n*delta_freq/fr)
-
             color = "green"
             if not (f1y < self.data.curr_freq < f2y):
                 color = "yellow"
@@ -143,7 +143,7 @@ class CLITuner(Tuner):
             if USE_FREQ_INDICATOR:
                 s = f"{found_note} {delta_freq:+.2f} Hz"
             else:
-                s = f"{found_note} {scale(n, pos)}"
+                s = f"{found_note} {scale(10, self.data.curr_freq, f0, f1, f2)}"
             s = colored(s, color)
             s += f"  [{self.data.curr_freq:7.2f} Hz]"
 
@@ -166,8 +166,9 @@ class CLITuner(Tuner):
 
 
 if __name__ == "__main__":
-    # print(SDInputDevice.available_devices())
+    print(SDInputDevice.available_devices())
     # tuner = CLITuner(note_range=UKULELE_RANGE)
-    tuner = CLITuner(note_list=UKULELE_NOTES)
-    # tuner = CLITuner(note_list=GUITAR_NOTES)
+    # tuner = CLITuner(note_list=UKULELE_NOTES)
+    # tuner = CLITuner(note_range=GUITAR_RANGE)
+    tuner = CLTuner(note_list=GUITAR_NOTES)
     tuner.start()

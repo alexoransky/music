@@ -9,14 +9,31 @@
 # https://doi.org/10.1038/s41598-019-50234-9
 
 import numpy as np
+import math
 from copy import copy
+from typing import Tuple
+from abc import ABC, abstractmethod
 
 fft = np.fft.fft
 rfft = np.fft.rfft
 ifft = np.fft.ifft
 
 
-class STFT:
+class Transform(ABC):
+    @abstractmethod
+    def process(self, data: np.array) -> np.array:
+        return None
+
+    @abstractmethod
+    def bin_to_freq(self, bin: int) -> float:
+        return 0.0
+
+    @abstractmethod
+    def freq_to_bin(self, freq: float) -> int:
+        return 0
+
+
+class STFT(Transform):
     def __init__(self, sample_rate, samples_per_frame=2048, frames_per_fft=16, sample_dtype=np.float32):
         """
         Creates an STFT transofm object
@@ -111,8 +128,19 @@ class STFT:
         return np.int32(np.floor(freq / self.freq_step))
 
 
-class CZT:
-    def __init__(self, sample_rate, samples_per_frame=2048, freq_range=(25, 4435), freq_step=1.0, sample_dtype=np.float32):
+class CZT(Transform):
+    def __init__(self, sample_rate: int, samples_per_frame: int, freq_range: Tuple[float, float], freq_step: float,
+                 sample_dtype=np.float32):
+        """
+        The class implements the Chirp Z transform.
+        The class works on samples that delivered in a frame.
+        The frequency range should be a lot narrower than the Nyquist frequency for the CZT to work fast.
+        :param sample_rate: sampling frequency, e.g. 48000
+        :param samples_per_frame:number of samples per frame, e.g. 2048
+        :param freq_range: a tuple of (min_freq, max_freq), Hz, e.g. (65, 250)
+        :param freq_step: Desired resolution, Hz, e.g. 0.1
+        :param sample_dtype: The NumPy type for the sample, e.g. np.float32
+        """
         self.sample_rate = np.int32(sample_rate)
         self.samples_per_frame = np.int32(samples_per_frame)
         self.freq_range = freq_range
