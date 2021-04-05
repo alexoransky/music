@@ -2,8 +2,8 @@
 # https://mzucker.github.io/2016/08/07/ukulele-tuner.html
 
 import numpy as np
-from input_device import SDInputDevice, PAInputDevice
-from transforms import STFT, CZT
+from audio.input_device import SDInputDevice, PAInputDevice
+from audio.transforms import STFT, CZT
 from theory import Note
 import time
 from threading import Thread

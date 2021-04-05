@@ -1,11 +1,10 @@
 import math
+import sounddevice
 from termcolor import cprint, colored
 from audio.input_device import SDInputDevice
 from audio.tuner import Tuner
 from theory.notes import Note
 from typing import Tuple, List
-
-DEVICE = 5
 
 NF_WARNING_THRESHOLD = 0.6
 NF_ERROR_THRESHOLD = 1.0
@@ -19,12 +18,16 @@ DEBUG_OUTPUT = False
 
 
 class CLTuner(Tuner):
-    def __init__(self, note_range: Tuple[str, str]=None, note_list: List[str]=None, note_a_freq_hz: float=440.0):
+    def __init__(self, device: int=None, note_range: Tuple[str, str]=None, note_list: List[str]=None, note_a_freq_hz: float=440.0):
         self.freq_step = 0.2
+        self.device = device
         self.note_range = note_range
         self.note_list = note_list
         self.midi_range = None
         self.midi_list = None
+
+        if self.device is None:
+            self.device = sounddevice.query_devices(device=sounddevice.default.device, kind="input")["hostapi"]
 
         # redefine the note range based on the supplied note list
         if self.note_list is not None:
@@ -46,9 +49,12 @@ class CLTuner(Tuner):
         if DEBUG_OUTPUT:
             cprint(f"Note A4 freq: {note_a_freq_hz:5.2f} Hz", "blue")
             cprint(f"Freq resolution: {self.freq_step:5.2f} Hz  Samples per frame: {samples_per_frame}", "blue")
+
+        cprint("Tuner for range ", "blue", end="")
+        print(self.note_range)
         cprint("\rInitializing...", "yellow", end="")
 
-        super().__init__(device=DEVICE, note_range=self.tuner_note_range,
+        super().__init__(device=self.device, note_range=self.tuner_note_range,
                          freq_step=self.freq_step, samples_per_frame=samples_per_frame,
                          note_a_freq_hz=note_a_freq_hz)
 
@@ -167,8 +173,8 @@ class CLTuner(Tuner):
 
 if __name__ == "__main__":
     print(SDInputDevice.available_devices())
-    # tuner = CLITuner(note_range=UKULELE_RANGE)
-    # tuner = CLITuner(note_list=UKULELE_NOTES)
-    # tuner = CLITuner(note_range=GUITAR_RANGE)
-    tuner = CLTuner(note_list=GUITAR_NOTES)
+    tuner = CLTuner(note_range=UKULELE_RANGE)
+    # tuner = CLTuner(note_list=UKULELE_NOTES)
+    # tuner = CLTuner(note_range=GUITAR_RANGE)
+    # tuner = CLTuner(note_list=GUITAR_NOTES)
     tuner.start()
