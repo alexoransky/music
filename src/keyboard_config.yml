@@ -40,7 +40,7 @@ keyboard_tab:
 
   # FluidSynth
 # Alternative sound font, bank and preset
-#SOUND_FONT = "data/OmegaGMGS2.sf2"
+#SOUND_FONT = "data/sf/OmegaGMGS2.sf2"
 #SF_BANK = 128
 #SF_PRESET = 56
 #SF_PRESET = 4

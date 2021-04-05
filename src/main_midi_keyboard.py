@@ -18,7 +18,7 @@ TUNING = Tuning.TUNING_12_TET
 # TUNING = Tuning.TUNING_5_LIMIT
 
 # Alternative sound font, bank and preset
-#SOUND_FONT = "../data/OmegaGMGS2.sf2"
+#SOUND_FONT = "../data/sf/OmegaGMGS2.sf2"
 #
 # Stereo Standart
 # SF_BANK = 128
@@ -33,8 +33,8 @@ TUNING = Tuning.TUNING_12_TET
 # SF_PRESET = 80
 
 
-SOUND_FONT = "../data/20-synth-sf/Perfect Sine.sf2"
-# SOUND_FONT = "../data/Sine Wave.sf2"
+SOUND_FONT = "../data/sf/20-synth-sf/Perfect Sine.sf2"
+# SOUND_FONT = "../data/sf/Sine Wave.sf2"
 SF_BANK = 0
 SF_PRESET = 0
 

@@ -114,7 +114,7 @@ Bunch of sound fonts are here:
 https://sites.google.com/site/soundfonts4u/
 
 Initialize fluidsynth with a small sound font to use the CLI.  This is not needed for python program.
-fluidsynth -o midi.driver=coremidi -o audio.driver=coreaudio -o audio.coreaudio.device=default -o audio.period-size=256 /Users/alex/PycharmProject/music/data/Nice-Keys-B-Plus-JN1.4.sf2
+fluidsynth -o midi.driver=coremidi -o audio.driver=coreaudio -o audio.coreaudio.device=default -o audio.period-size=256 /Users/alex/PycharmProject/music/data/sf/Nice-Keys-B-Plus-JN1.4.sf2
 
 We will be using PyFLuidSynth for a Python API wrapper.
 https://github.com/nwhitehead/pyfluidsynth
