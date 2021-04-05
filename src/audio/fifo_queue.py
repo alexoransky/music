@@ -12,6 +12,7 @@ class FIFOQueue:
             is_deque = False
 
         self._queue = None
+        self._size = 0  # qsize() might not be implemented for MP queue
         self._use_deque = is_deque
         self._use_mpqueue = multiprocess
         if self._use_deque:
@@ -27,6 +28,7 @@ class FIFOQueue:
                 self._queue = Queue(maxsize=max_len)
 
     def clear(self):
+        self._size = 0
         if self._use_deque:
             self._queue.clear()
         else:
@@ -36,8 +38,11 @@ class FIFOQueue:
     def size(self):
         if self._use_deque:
             return len(self._queue)
-        else:
+
+        try:
             return self._queue.qsize()
+        except NotImplementedError:
+            return self._size
 
     def put(self, x):
         if self._use_deque:
@@ -45,15 +50,19 @@ class FIFOQueue:
         else:
             try:
                 self._queue.put_nowait(x)
+                self._size += 1
             except:
                 return False
         return True
 
     def get(self):
+        if self._use_deque:
+            return self._queue.popleft()
+
         try:
-            if self._use_deque:
-                return self._queue.popleft()
-            else:
-                return self._queue.get_nowait()
+            x = self._queue.get_nowait()
         except:
             return None
+
+        self._size -= 1
+        return x
