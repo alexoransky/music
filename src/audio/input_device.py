@@ -164,6 +164,26 @@ class SDInputDevice(InputDevice):
     def available_devices(cls):
         return sd.query_devices()
 
+    @classmethod
+    def default_device(cls):
+        devices = sd.query_devices()
+        for i, device in enumerate(devices):
+            try:
+                max_ch = sd.query_devices(i, 'input')['max_input_channels']
+            except:
+                continue
+            if max_ch > 0:
+                return i
+        return None
+
+    @classmethod
+    def device_name(cls, dev_no):
+        try:
+            name = sd.query_devices(dev_no)["name"]
+        except:
+            return None
+        return name
+
     def set_device(self, device):
         self._device = device
         self._sample_rate = sd.query_devices(self._device, 'input')['default_samplerate']

@@ -51,6 +51,7 @@ class Tuner:
 
         self.samples_per_frame = samples_per_frame
 
+        self.device = None
         if Tuner.USE_SD:
             self.device = SDInputDevice(device=device, samples_per_frame=self.samples_per_frame, queue_data=True)
         else:
@@ -81,6 +82,9 @@ class Tuner:
         return f1[0], f2[0]
 
     def start(self):
+        if self.device is None:
+            return
+
         if not self.device.data_is_queued():
             self.device.set_process_fn(self._process_data)
         self.device.start()
