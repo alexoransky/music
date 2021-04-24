@@ -7,6 +7,9 @@ import pyaudio
 
 
 class InputDevice:
+    """
+    Base class for data sampling
+    """
     DEFAULT_SAMPLE_RATE = 48000
 
     def __init__(self, device, channel_cnt: int, samples_per_frame: int,
@@ -107,8 +110,8 @@ class InputDevice:
         """
         This method is used when the data that is read from a device, such as SoundDevice,
          needs to be buffered before it can be processed.
-         SoundDevice data needs data[:, 0  or data.copy to be copied.
-         Overwrite this method if other way to buffer data is needed.
+         SoundDevice data needs data[:, 0]  or data.copy to be copied.
+         Overwrite this method if another way to buffer data is needed.
         :param data: raw data from the device's stream
         :return: a copy of the supplied data
         """
@@ -139,13 +142,16 @@ class InputDevice:
 
     def _main_loop(self):
         """
-        Overwrite this method to receive the data from the device
+        Overwrite this method to receive data from the device
         """
         if not self._active:
             return
 
 
 class SDInputDevice(InputDevice):
+    """
+    The class supports data sampling from SoundDevice
+    """
     def __init__(self, device=None, channel_cnt=1, samples_per_frame=2048,
                  queue_data=True, max_queue_len=5,
                  multiprocess=True):
@@ -204,6 +210,9 @@ class SDInputDevice(InputDevice):
 
 
 class PAInputDevice(InputDevice):
+    """
+    The class supports data sampling from PyAudio
+    """
     def __init__(self, device=None, channel_cnt=1, samples_per_frame=2048,
                  queue_data=True, max_queue_len=5,
                  multiprocess=True):
