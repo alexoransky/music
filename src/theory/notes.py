@@ -139,6 +139,11 @@ class Note:
         return Note.midi_number_to_note_name(midi_number)
 
     @classmethod
+    def proper_note_name(cls, note_name):
+        midi_number = Note.note_name_to_midi_number(note_name)
+        return Note.midi_number_to_note_name(midi_number)
+
+    @classmethod
     def validate_name(cls, name):
         if len(name) == 0:
             return ""
