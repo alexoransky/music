@@ -56,8 +56,9 @@ class CLTuner(Tuner):
             cprint(f"Note A4 freq: {note_a_freq_hz:5.2f} Hz", "blue")
             cprint(f"Freq resolution: {self.freq_step:5.2f} Hz  Samples per frame: {samples_per_frame}", "blue")
 
-        cprint(f"Tuner for range {Note.proper_note_name(self.note_range[0])} to {Note.proper_note_name(self.note_range[-1])}", "blue")
-        # print(self.note_range)
+        note_1 = Note.proper_note_name(self.note_range[0])
+        note_2 = Note.proper_note_name(self.note_range[-1])
+        cprint(f"Tuner for range {note_1} to {note_2}", "blue")
         cprint("\rInitializing...", "yellow", end="")
 
         super().__init__(device=device, note_range=self.tuner_note_range,
