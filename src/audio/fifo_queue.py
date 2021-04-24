@@ -57,7 +57,10 @@ class FIFOQueue:
 
     def get(self):
         if self._use_deque:
-            return self._queue.popleft()
+            try:
+                return self._queue.popleft()
+            except:
+                return None
 
         try:
             x = self._queue.get_nowait()
