@@ -172,9 +172,8 @@ class CLTuner(Tuner):
 
             return s
 
-        if tuner.data.state == 1:
-            print("\r                                                  ", end="")
-            cprint(f"\r{note_str()}  {error_str()}", end="")
+        print("\r                                                  ", end="")
+        cprint(f"\r{note_str()}  {error_str()}", end="")
 
 
 if __name__ == "__main__":

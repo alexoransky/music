@@ -13,6 +13,7 @@ from typing import Tuple
 
 @dataclass
 class TunerData:
+    samples: object = None
     noise_floor: int = 0
     midi_num: int = 0
     note: str = ""
@@ -29,6 +30,9 @@ class TunerErrors:
 
 
 class Tuner:
+    INIT_STATE = 0
+    PROCESS_STATE = 1
+
     INIT_TIME_S = 2
     THRESHOLD_DB = 25
     USE_SD = True
@@ -37,15 +41,16 @@ class Tuner:
     if USE_STFT:
         SAMPLES_PER_FRAME = 2 * 1024
         FRAMES_PER_FFT = 16
-    else:
+        FREQ_STEP = 1.0
+    else:  # CZT
         SAMPLES_PER_FRAME = 2 * 1024
         FREQ_STEP = 0.1
 
     def __init__(self, device: int, note_range: Tuple[str, str],
-                 samples_per_frame: int=SAMPLES_PER_FRAME, freq_step: float=FREQ_STEP,
-                 note_a_freq_hz: float=440.0):
+                 samples_per_frame: int = SAMPLES_PER_FRAME, freq_step: float = FREQ_STEP,
+                 note_a_freq_hz: float = 440.0):
 
-        self.freq_range = Tuner. get_freq_range(note_range, note_a_freq_hz)
+        self.freq_range = Tuner.get_freq_range(note_range, note_a_freq_hz)
         self.threshold = Tuner.THRESHOLD_DB
         self.note_a_freq_hz = note_a_freq_hz
 
@@ -85,8 +90,11 @@ class Tuner:
         if self.device is None:
             return
 
+        # only start if data will be queued
         if not self.device.data_is_queued():
-            self.device.set_process_fn(self._process_data)
+            return
+
+        self.data.state = Tuner.INIT_STATE
         self.device.start()
         self._active = True
         self._thread = Thread(target=self._main_loop)
@@ -104,21 +112,21 @@ class Tuner:
             if not self._active:
                 continue
 
-            if self.data.state == 0:
+            if self.data.state == Tuner.INIT_STATE:
                 curr_time = time.time()
                 if (curr_time - start_time) > Tuner.INIT_TIME_S:
-                    self.data.state = 1
+                    self.data.state = Tuner.PROCESS_STATE
                     self.on_state_change()
                     continue
 
-            if self.device.data_is_queued():
-                data = self.device.get_data()
+            self.data.samples = self.device.get_data()
 
-            if self.data.state == 0:
-                self._determine_noise_floor(data)
+            if self.data.state == Tuner.INIT_STATE:
+                self._determine_noise_floor(self.data.samples)
+                continue
 
-            if self.data.state == 1:
-                peak_freq = self._process_data(data)
+            if self.data.state == Tuner.PROCESS_STATE:
+                peak_freq = self._get_peak_freq(self.data.samples)
                 if peak_freq is None:
                     continue
 
@@ -148,7 +156,7 @@ class Tuner:
         clipped = spectrum[self.bin_range[0]:self.bin_range[1]]
         self.data.noise_floor = max(self.data.noise_floor, np.average(clipped))
 
-    def _process_data(self, data):
+    def _get_peak_freq(self, data):
         if data is None:
             return None
 
