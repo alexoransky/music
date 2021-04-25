@@ -1,7 +1,7 @@
 from termcolor import cprint
 from theory.chords import Chord
 from audio.synth import Synth
-from theory.scales import HeptatonicScale, PentatonicScale
+from theory.scales import PentatonicScale, HexatonicScale, HeptatonicScale
 
 
 def play_notes(synth, notes, chord=False):
@@ -30,13 +30,18 @@ if __name__ == "__main__":
 
     # https: // www.basicmusictheory.com / f - minor - pentatonic - scale
 
+    play_scale(synth, HexatonicScale("B"))
+    play_scale(synth, HexatonicScale("C"))  # TODO generates B#- should be C
+    play_scale(synth, HexatonicScale("D"))  # TODO generates C##- should be D
     # play_scale(synth, PentatonicScale("A", "natural minor"))
     # play_scale(synth, PentatonicScale("E", "natural minor"))
-    play_scale(synth, HeptatonicScale("C", "jazz minor"))
-    play_scale(synth, HeptatonicScale("E", "minor"))
-    play_scale(synth, HeptatonicScale("E", "harmonic minor"))
-    play_scale(synth, HeptatonicScale("E", "phrygian"))
-    play_scale(synth, HeptatonicScale("E", "phrygian dominant"))
+    # play_scale(synth, HeptatonicScale("C", "jazz minor"))
+    # play_scale(synth, HeptatonicScale("C", "locrian"))
+    # play_scale(synth, HeptatonicScale("C", "altered"))
+    # play_scale(synth, HeptatonicScale("E", "minor"))
+    # play_scale(synth, HeptatonicScale("E", "harmonic minor"))
+    # play_scale(synth, HeptatonicScale("E", "phrygian"))
+    # play_scale(synth, HeptatonicScale("E", "phrygian dominant"))
     # play_scale(synth, PentatonicScale("B", "natural minor"))
     # play_scale(synth, PentatonicScale("F#", "natural minor"))
     # play_scale(synth, PentatonicScale("C#", "natural minor"))

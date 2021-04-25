@@ -44,6 +44,7 @@ class HeptatonicScale(Scale):
         "locrian":           "1221222",
 
         "jazz minor":        "2122221",     # major with lowered 3rd
+        "altered":           "1212222",     # altered dominant, palamidian, super-locrian, locrian with flat 4
         "phrygian dominant": "1312122",     # spanish gypsy, Hijaz - phrygian with risen 3rd
         "harmonic minor":    "2122131",     # natural minor with risen 7th
         "hungarian minor":   "2131131",     # gypsy minor
@@ -160,6 +161,44 @@ class PentatonicScale(Scale):
         if self.mode_name != self.mode:
             ret += f" ({self.mode})"
         ret += " " + self.type().lower()
+        ret += ": "
+
+        ret += " ".join([x.name() for x in self.notes])
+        return ret
+
+
+class HexatonicScale(Scale):
+    INTERVALS = {
+        "whole tone": "222222"
+    }
+
+    def __init__(self, root_note: str, octave=4):
+        super().__init__()
+        self.root = Note(name=root_note, octave=octave)
+
+        self.mode = "whole tone"  # the only mode
+        self.mode_name = self.mode
+        self.notes = None
+
+        self.notes = self._scale()
+        self.note_cnt = 6
+
+    @staticmethod
+    def type():
+        return "Hexatonic"
+
+    def _scale(self):
+        lst = list()
+        lst.append(self.root)
+        note = self.root
+        for i in self.INTERVALS[self.mode]:
+            note = note + i
+            lst.append(note)
+
+        return lst
+
+    def __str__(self):
+        ret = self.root.name() + " " + self.mode_name
         ret += ": "
 
         ret += " ".join([x.name() for x in self.notes])
