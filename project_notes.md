@@ -503,3 +503,10 @@ https://www.univie.ac.at/nonstatgab/pdf_files/dogrhove12_amsart.pdf
 ---------
 
 Switched to Python 3.9.2.
+
+4/24/2021
+---------
+
+Going to add a recorder to save sound samples.
+Reworked tuner class to always user queued smaples.
+Added a few heptatonic scales.

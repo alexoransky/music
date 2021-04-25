@@ -31,8 +31,12 @@ if __name__ == "__main__":
     # https: // www.basicmusictheory.com / f - minor - pentatonic - scale
 
     # play_scale(synth, PentatonicScale("A", "natural minor"))
-    play_scale(synth, PentatonicScale("E", "natural minor"))
+    # play_scale(synth, PentatonicScale("E", "natural minor"))
+    play_scale(synth, HeptatonicScale("C", "jazz minor"))
     play_scale(synth, HeptatonicScale("E", "minor"))
+    play_scale(synth, HeptatonicScale("E", "harmonic minor"))
+    play_scale(synth, HeptatonicScale("E", "phrygian"))
+    play_scale(synth, HeptatonicScale("E", "phrygian dominant"))
     # play_scale(synth, PentatonicScale("B", "natural minor"))
     # play_scale(synth, PentatonicScale("F#", "natural minor"))
     # play_scale(synth, PentatonicScale("C#", "natural minor"))

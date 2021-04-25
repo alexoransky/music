@@ -22,6 +22,6 @@ if __name__ == "__main__":
     scale = HeptatonicScale("C#", "lydian")
     print(scale)
 
-    for mode in HeptatonicScale.DIATONIC_INTERVALS.keys():
+    for mode in HeptatonicScale.INTERVALS.keys():
         scale = HeptatonicScale("G", mode)
         print(scale)

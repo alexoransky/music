@@ -36,7 +36,7 @@ def find_scales(notes, pentatonic=True, modes=False):
         if note in NOTES_TO_EXCLUDE:
             continue
         if modes:
-            for mode in scale_type.DIATONIC_INTERVALS.keys():
+            for mode in scale_type.INTERVALS.keys():
                 scales.append(scale_type(note, mode=mode))
         else:
             scales.append(scale_type(note, mode="major"))

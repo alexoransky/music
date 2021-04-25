@@ -3,7 +3,7 @@ from copy import deepcopy
 
 
 class Scale:
-    DIATONIC_INTERVALS = {}
+    INTERVALS = {}
 
     def __init__(self):
         self.note_cnt = 0
@@ -17,7 +17,7 @@ class Scale:
         return "Generic"
 
     def _validate_mode(self, mode):
-        if mode.lower() in self.DIATONIC_INTERVALS.keys():
+        if mode.lower() in self.INTERVALS.keys():
             return mode.lower()
 
         return None
@@ -33,14 +33,23 @@ class Scale:
 
 
 class HeptatonicScale(Scale):
-    DIATONIC_INTERVALS = {
-        "ionian":     "TTSTTTS",      # major
-        "dorian":     "TSTTTST",
-        "phrygian":   "STTTSTT",
-        "lydian":     "TTTSTTS",
-        "mixolydian": "TTSTTST",
-        "aeolian":    "TSTTSTT",     # natural minor
-        "locrian":    "STTSTTT"
+    INTERVALS = {
+        # diatonic scales
+        "ionian":            "2212221",     # major
+        "dorian":            "2122212",
+        "phrygian":          "1222122",
+        "lydian":            "2221221",
+        "mixolydian":        "2212212",
+        "aeolian":           "2122122",     # natural minor
+        "locrian":           "1221222",
+
+        "jazz minor":        "2122221",     # major with lowered 3rd
+        "phrygian dominant": "1312122",     # spanish gypsy, Hijaz - phrygian with risen 3rd
+        "harmonic minor":    "2122131",     # natural minor with risen 7th
+        "hungarian minor":   "2131131",     # gypsy minor
+        "hungarian major":   "3121212",
+        "ukranian dorian":   "2131212",
+        "double harmonic":   "1312131"      # gypsy major
     }
 
     def __init__(self, root_note: str, mode: str = "", octave=4):
@@ -71,7 +80,7 @@ class HeptatonicScale(Scale):
         lst = list()
         lst.append(self.root)
         note = self.root
-        for i in self.DIATONIC_INTERVALS[self.mode]:
+        for i in self.INTERVALS[self.mode]:
             note = note + i
             lst.append(note)
 
@@ -88,12 +97,12 @@ class HeptatonicScale(Scale):
 
 
 class PentatonicScale(Scale):
-    DIATONIC_INTERVALS = {
-        "ionian":     "TT3T3",       # major:                 heptatonic ioniam sans 4th and 7th degrees
-        "dorian":     "T3T3T",       # egyptian, suspended:   heptatonic dorian sans 3rd and 6th degrees
-        "phrygian":   "3T3TT",       # blues minor, Man Gong: heptatonic phrygian sans 2nd and 5th degrees
-        "mixolydian": "T3TT3",       # blues major, Ritsusen: heptatonic mixolydian sans 3rd and 7th degrees
-        "aeolian":    "3TT3T"        # natural minor:         heptatonic aeolian sans 2nd and 6th degrees
+    INTERVALS = {
+        "ionian":     "22323",       # major:                 heptatonic ioniam sans 4th and 7th degrees
+        "dorian":     "23232",       # egyptian, suspended:   heptatonic dorian sans 3rd and 6th degrees
+        "phrygian":   "32322",       # blues minor, Man Gong: heptatonic phrygian sans 2nd and 5th degrees
+        "mixolydian": "23223",       # blues major, Ritsusen: heptatonic mixolydian sans 3rd and 7th degrees
+        "aeolian":    "32232"        # natural minor:         heptatonic aeolian sans 2nd and 6th degrees
     }
 
     def __init__(self, root_note: str, mode: str = "", octave=4):
