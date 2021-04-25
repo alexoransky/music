@@ -510,3 +510,8 @@ Switched to Python 3.9.2.
 Going to add a recorder to save sound samples.
 Reworked tuner class to always user queued smaples.
 Added a few heptatonic scales.
+
+4/25/2021
+---------
+
+Reworked scales.py to support pentatonic to octatonic scales.
