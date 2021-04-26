@@ -1,5 +1,5 @@
 import unittest
-from theory.scales import HeptatonicScale, PentatonicScale
+from theory.scales import PentatonicScale, HexatonicScale, HeptatonicScale
 
 # see the following website for test reference:
 # https://www.basicmusictheory.com/f-sharp-harmonic-minor-scale
@@ -254,6 +254,50 @@ class TestPentatonicScale(unittest.TestCase):
         self.assertEqual(scale.name(), "F♯ minor pentatonic")
         self.assertEqual(scale.mode_name(), "aeolian")
         self.assertEqual(scale.note_names(), "F♯ A B C♯ E")
+
+
+class TestHexatonicScale(unittest.TestCase):
+    def test_C_whole_tone(self):
+        scale = HexatonicScale("C", "whole tone")
+        self.assertEqual(scale.name(), "C whole tone")
+        self.assertEqual(scale.mode_name(), "whole tone")
+        self.assertEqual(scale.note_names(), "C D E F♯ G♯ A♯")
+
+    def test_Db_whole_tone(self):
+        scale = HexatonicScale("Db", "whole tone")
+        self.assertEqual(scale.name(), "D♭ whole tone")
+        self.assertEqual(scale.mode_name(), "whole tone")
+        self.assertEqual(scale.note_names(), "D♭ E♭ F G A B")
+
+    def test_C_major(self):
+        scale = HexatonicScale("C", "major")
+        self.assertEqual(scale.name(), "C major hexatonic")
+        self.assertEqual(scale.mode_name(), "major")
+        self.assertEqual(scale.note_names(), "C D E F G A")
+
+    def test_C_minor(self):
+        scale = HexatonicScale("C", "minor")
+        self.assertEqual(scale.name(), "C minor hexatonic")
+        self.assertEqual(scale.mode_name(), "minor")
+        self.assertEqual(scale.note_names(), "C D E♭ F G B♭")
+
+    def test_C_augmented(self):
+        scale = HexatonicScale("C", "augmented")
+        self.assertEqual(scale.name(), "C augmented")
+        self.assertEqual(scale.mode_name(), "augmented")
+        self.assertEqual(scale.note_names(), "C D♯ E F𝄪 G♯ A𝄪")    #  C E♭ E G G♯ B
+
+    def test_C_blues(self):
+        scale = HexatonicScale("C", "blues")
+        self.assertEqual(scale.name(), "C blues")
+        self.assertEqual(scale.mode_name(), "blues")
+        self.assertEqual(scale.note_names(), "C E♭ F G♭ G B♭")
+
+    def test_Ds_blues(self):
+        scale = HexatonicScale("D#", "blues")
+        self.assertEqual(scale.name(), "D♯ blues")
+        self.assertEqual(scale.mode_name(), "blues")
+        self.assertEqual(scale.note_names(), "D♯ F♯ G♯ A A♯ C♯")
 
 
 if __name__ == "__main__":

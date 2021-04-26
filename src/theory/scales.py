@@ -170,7 +170,7 @@ class PentatonicScale(Scale):
             "dorian":     (3, 6),
             "phrygian":   (2, 5),
             "mixolydian": (3, 7),
-            "aeolian":    (2, 6),
+            "aeolian":    (2, 6)
             # "in":         (1, None)
         }
 
@@ -193,6 +193,8 @@ class PentatonicScale(Scale):
                 n.use_other_name(next_expected)
             next_expected = self.next_note(next_expected)
             note_idx += 1
+            if note_idx >= self.NOTES_CNT:
+                break
 
         self.notes = normalized
         return True
@@ -202,16 +204,61 @@ class HexatonicScale(Scale):
     TYPE = "Hexatonic"
     NOTES_CNT = 6
     INTERVALS = {
-        "whole tone": "222222"
+        "whole tone": "222222",
+        "major":      "221223",
+        "minor":      "212232",
+        "augmented":  "313131",
+        "blues":      "311232"
     }
-    # TODO Add blues scale  https://en.wikipedia.org/wiki/Hexatonic_scale
+
+    SCALE_NAME = {
+        "major": "major hexatonic",
+        "minor": "minor hexatonic"
+    }
 
     def _validate_mode(self, mode):
         _mode = mode
-        if mode == "":
-            _mode = "whole tone"
 
         return super()._validate_mode(_mode)
+
+    def _normalize(self):
+        skipped_degrees = {
+            "major": (7, ),
+            "minor": (6, ),
+        }
+
+        if len(self.notes) == 0:
+            return True
+
+        if self.mode == "blues":
+            pentatonic = PentatonicScale(self._root_note, "minor", self._octave)
+            self.notes = pentatonic.notes.copy()
+            blue_note = Note(self.notes[0].name()) + 6
+            blue_note.use_other_name(suggested_root=self.notes[3].name()[0])
+            self.notes.insert(3, blue_note)
+            return
+
+        normalized = self.notes.copy()
+
+        next_expected = normalized[0].name()[0]
+        note_idx = 0
+        for deg_idx in range(1, 8):
+            if deg_idx in skipped_degrees.get(self.mode, (0, )):
+                next_expected = self.next_note(next_expected)
+                continue
+
+            n = normalized[note_idx]
+            if n.name()[0] != next_expected:
+                if not self.match_note(next_expected, n.names):
+                    return False
+                n.use_other_name(next_expected)
+            next_expected = self.next_note(next_expected)
+            note_idx += 1
+            if note_idx >= self.NOTES_CNT:
+                break
+
+        self.notes = normalized
+        return True
 
 
 class HeptatonicScale(Scale):
