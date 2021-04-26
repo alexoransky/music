@@ -30,10 +30,11 @@ if __name__ == "__main__":
 
     # https: // www.basicmusictheory.com / f - minor - pentatonic - scale
 
-    # play_scale(synth, PentatonicScale("A", "natural minor"))
+    # play_scale(synth, PentatonicScale("C", "major"))
+    play_scale(synth, PentatonicScale("Ab", "natural minor"))
     # play_scale(synth, PentatonicScale("E", "natural minor"))
-    play_scale(synth, PentatonicScale("D", "yo"))           #  D E F𝄪 G𝄪 A𝄪 C𝄪
-    play_scale(synth, PentatonicScale("D", "in"))
+    # play_scale(synth, PentatonicScale("D", "yo"))           #  D E F𝄪 G𝄪 A𝄪 C𝄪
+    # play_scale(synth, PentatonicScale("D", "in"))
     play_scale(synth, PentatonicScale("B", "natural minor"))     #  B D E F♯ A B  # TODO
     play_scale(synth, PentatonicScale("F#", "natural minor"))    #  F♯ A B C♯ E F♯
     # play_scale(synth, PentatonicScale("C#", "natural minor"))

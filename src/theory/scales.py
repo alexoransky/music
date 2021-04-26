@@ -4,7 +4,8 @@ from .notes import Note
 class Scale:
     TYPE = "Generic"
     NOTES_CNT = 0
-    INTERVALS = {}
+    INTERVALS = {}   # maps mode to intervals string
+    SCALE_NAME = {}  # maps mode to scale name
 
     def __init__(self, root_note: str, mode: str = "", octave: int = 4):
         self._root_note = root_note
@@ -13,7 +14,6 @@ class Scale:
 
         self.root = Note(name=root_note, octave=octave)
         self.mode = self._validate_mode(mode)
-        self.mode_name = self._mode_name()
 
         self.notes = None
         if self.mode is None:
@@ -52,7 +52,7 @@ class Scale:
         lst = list()
         lst.append(self.root)
         note = self.root
-        for i in self.INTERVALS[self.mode]:
+        for i in self.INTERVALS[self.mode][:-1]:
             note = note + i
             lst.append(note)
 
@@ -71,14 +71,28 @@ class Scale:
         return f"{type(self).__name__}({self._root_note}, {self._mode}, {self._octave})"
 
     def __str__(self):
-        return self.TYPE
+        ret = f"{self.root.name()}  {self.mode_name()}: "
+        ret += " ".join([x.name() for x in self.notes])
+        return ret
 
     def name(self) -> str:
         """
         The method returns the scale name
         :return: Scale name, including the mode name, e.g. "C minor pentatonic"
         """
-        return self.root.name() + " " + self.mode_name
+        scale_name = self.SCALE_NAME.get(self.mode, self.mode)
+        if scale_name is None:
+            scale_name = "unknown"
+        return f"{self.root.name()} {scale_name}"
+
+    def mode_name(self) -> str:
+        """
+        The method returns the mode name of the scale
+        :return: Mode name, e.g. "aeolian"
+        """
+        if self.mode is None:
+            return "unknown"
+        return self.mode
 
     def note_names(self) -> str:
         """
@@ -89,6 +103,115 @@ class Scale:
             return ""
 
         return " ".join([x.name() for x in self.notes])
+
+    @staticmethod
+    def next_note(note):
+        notes = ["A", "B", "C", "D", "E", "F", "G"]
+        idx = Note.NOTES[note]
+        if idx + 1 >= len(notes):
+            return "A"
+        return notes[idx + 1]
+
+    @staticmethod
+    def match_note(note: str, note_names: tuple):
+        # note is the name without any accidental
+        # note names can be with accidentals
+        for name in note_names:
+            if name[0] == note:
+                return True
+        return False
+
+
+class PentatonicScale(Scale):
+    TYPE = "Pentatonic"
+    NOTES_CNT = 5
+    INTERVALS = {
+        "ionian":     "22323",       # major:                     heptatonic ionian sans 4th and 7th degrees
+        "dorian":     "23232",       # egyptian, suspended:       heptatonic dorian sans 3rd and 6th degrees
+        "phrygian":   "32322",       # blues minor, Man Gong:     heptatonic phrygian sans 2nd and 5th degrees
+        "mixolydian": "23223",       # blues major, Ritsusen, yo: heptatonic mixolydian sans 3rd and 7th degrees
+        "aeolian":    "32232",       # natural minor:             heptatonic aeolian sans 2nd and 6th degrees
+        # TODO add japanese scales  https://www.musicnotes.com/now/musictheory/japanese-scales-in-music-theory
+        # "in":         "14221"        # sakura pentatonic
+    }
+    # TODO add prygian dominant pentatonic
+
+    SCALE_NAME = {
+        "ionian":     "major pentatonic",
+        "dorian":     "egyptian (suspended)",
+        "phrygian":   "blues minor",
+        "mixolydian": "blues major",
+        "aeolian":    "minor pentatonic",
+    }
+
+    def _validate_mode(self, mode):
+        _mode = mode
+        if mode.lower() == "major" or mode == "":
+            _mode = "ionian"
+        if mode.lower() == "egyptian":
+            _mode = "dorian"
+        if mode.lower() == "blues minor":
+            _mode = "phrygian"
+        if mode.lower() == "blues major" or mode == "yo":
+            _mode = "mixolydian"
+        if mode.lower() == "minor" or mode.lower() == "natural minor":
+            _mode = "aeolian"
+
+        return super()._validate_mode(_mode)
+
+    def __str__(self):
+        ret = f"{self.root.name()}  {self.TYPE.lower()} {self.mode_name()}: "
+        ret += " ".join([x.name() for x in self.notes])
+        return ret
+
+    def _normalize(self):
+        skipped_degrees = {
+            "ionian":     (4, 7),
+            "dorian":     (3, 6),
+            "phrygian":   (2, 5),
+            "mixolydian": (3, 7),
+            "aeolian":    (2, 6),
+            # "in":         (1, None)
+        }
+
+        if len(self.notes) == 0:
+            return True
+
+        normalized = self.notes.copy()
+
+        next_expected = normalized[0].name()[0]
+        note_idx = 0
+        for deg_idx in range(1, 8):
+            if deg_idx in skipped_degrees[self.mode]:
+                next_expected = self.next_note(next_expected)
+                continue
+
+            n = normalized[note_idx]
+            if n.name()[0] != next_expected:
+                if not self.match_note(next_expected, n.names):
+                    return False
+                n.use_other_name(next_expected)
+            next_expected = self.next_note(next_expected)
+            note_idx += 1
+
+        self.notes = normalized
+        return True
+
+
+class HexatonicScale(Scale):
+    TYPE = "Hexatonic"
+    NOTES_CNT = 6
+    INTERVALS = {
+        "whole tone": "222222"
+    }
+    # TODO Add blues scale  https://en.wikipedia.org/wiki/Hexatonic_scale
+
+    def _validate_mode(self, mode):
+        _mode = mode
+        if mode == "":
+            _mode = "whole tone"
+
+        return super()._validate_mode(_mode)
 
 
 class HeptatonicScale(Scale):
@@ -115,8 +238,13 @@ class HeptatonicScale(Scale):
         "ukranian dorian":   "2131212",     # ukranian minor, romanian minor, altered dorian
         "double harmonic":   "1312131"      # gypsy major
     }
-    # TODO add modes of hungarian major scale
+    # TODO add modes of hungarian major scale  https://en.wikipedia.org/wiki/Hungarian_major_scale
     # TODO add modes of double harmonic scale  https://en.wikipedia.org/wiki/Double_harmonic_scale
+
+    SCALE_NAME = {
+        "ionian":  "major",
+        "aeolian": "minor",
+    }
 
     def _validate_mode(self, mode):
         _mode = mode
@@ -127,108 +255,22 @@ class HeptatonicScale(Scale):
 
         return super()._validate_mode(_mode)
 
-    def __str__(self):
-        ret = self.root.name() + " " + self.mode_name
-        if self.mode_name != self.mode:
-            ret += f" ({self.mode})"
-        ret += ": "
-
-        ret += " ".join([x.name() for x in self.notes])
-        return ret
-
     def _normalize(self):
-        NOTES = ["A", "B", "C", "D", "E", "F", "G"]
-
-        def next_note(note):
-            idx = Note.NOTES[note]
-            if idx+1 >= len(NOTES):
-                return "A"
-            return NOTES[idx+1]
-
-        def match_note(note: str, note_names: tuple):
-            for name in note_names:
-                if name[0] == note:
-                    return True
-            return False
-
         if len(self.notes) == 0:
             return True
 
         normalized = self.notes.copy()
 
-        root = normalized[0].name()[0]
-        next_expected = next_note(root)
-        for n in normalized[1:-1]:
+        next_expected = normalized[0].name()[0]
+        for n in normalized:
             if n.name()[0] != next_expected:
-                if not match_note(next_expected, n.names):
+                if not self.match_note(next_expected, n.names):
                     return False
                 n.use_other_name(next_expected)
-            next_expected = next_note(next_expected)
+            next_expected = self.next_note(next_expected)
 
         self.notes = normalized
         return True
-
-
-class PentatonicScale(Scale):
-    TYPE = "Pentatonic"
-    NOTES_CNT = 5
-    INTERVALS = {
-        "ionian":     "22323",       # major:                     heptatonic ioniam sans 4th and 7th degrees
-        "dorian":     "23232",       # egyptian, suspended:       heptatonic dorian sans 3rd and 6th degrees
-        "phrygian":   "32322",       # blues minor, Man Gong:     heptatonic phrygian sans 2nd and 5th degrees
-        "mixolydian": "23223",       # blues major, Ritsusen, yo: heptatonic mixolydian sans 3rd and 7th degrees
-        "aeolian":    "32232",       # natural minor:             heptatonic aeolian sans 2nd and 6th degrees
-
-        "in":         "14221"        # sakura pentatonic
-    }
-
-    def _validate_mode(self, mode):
-        _mode = mode
-        if mode.lower() == "major" or mode == "":
-            _mode = "ionian"
-        if mode.lower() == "egyptian":
-            _mode = "dorian"
-        if mode.lower() == "blues minor":
-            _mode = "phrygian"
-        if mode.lower() == "blues major" or mode == "yo":
-            _mode = "mixolydian"
-        if mode.lower() == "natural minor":
-            _mode = "aeolian"
-
-        return super()._validate_mode(_mode)
-
-    def __str__(self):
-        ret = self.root.name() + " " + self.mode_name
-        if self.mode_name != self.mode:
-            ret += f" ({self.mode})"
-        ret += " " + self.TYPE.lower()
-        ret += ": "
-
-        ret += " ".join([x.name() for x in self.notes])
-        return ret
-
-
-class HexatonicScale(Scale):
-    TYPE = "Hexatonic"
-    NOTES_CNT = 6
-    INTERVALS = {
-        "whole tone": "222222"
-    }
-    # TODO Add blues scale
-
-    def _validate_mode(self, mode):
-        _mode = mode
-        if mode == "":
-            _mode = "whole tone"
-
-        return super()._validate_mode(_mode)
-
-    def __str__(self):
-        ret = self.root.name() + " " + self.mode_name
-        ret += ": "
-
-        ret += " ".join([x.name() for x in self.notes])
-        return ret
 
 
 class OctatonicScale(Scale):
@@ -249,9 +291,8 @@ class OctatonicScale(Scale):
         return super()._validate_mode(_mode)
 
     def __str__(self):
-        ret = self.root.name() + " " + self.mode_name
-        ret += " " + self.TYPE.lower()
-        ret += ": "
-
+        ret = f"{self.root.name()}  {self.TYPE.lower()} {self.mode_name()}: "
         ret += " ".join([x.name() for x in self.notes])
         return ret
+
+# TODO add chromatic, nonatonic, tetratonic scales  https://en.wikipedia.org/wiki/Scale_(music)
