@@ -216,11 +216,6 @@ class HexatonicScale(Scale):
         "minor": "minor hexatonic"
     }
 
-    def _validate_mode(self, mode):
-        _mode = mode
-
-        return super()._validate_mode(_mode)
-
     def _normalize(self):
         skipped_degrees = {
             "major": (7, ),
@@ -236,7 +231,7 @@ class HexatonicScale(Scale):
             blue_note = Note(self.notes[0].name()) + 6
             blue_note.use_other_name(suggested_root=self.notes[3].name()[0])
             self.notes.insert(3, blue_note)
-            return
+            return True
 
         normalized = self.notes.copy()
 
@@ -328,18 +323,32 @@ class OctatonicScale(Scale):
         "half tone/whole tone": "12121212"
     }
 
-    def _validate_mode(self, mode):
-        _mode = ""
-        if mode.lower() == "whole tone/half tone" or mode == "w/h":
-            _mode = "whole tone/half tone"
-        if mode.lower() == "half tone/whole tone" or mode.lower() == "h/w":
-            _mode = "half tone/whole tone"
-
-        return super()._validate_mode(_mode)
-
     def __str__(self):
         ret = f"{self.root.name()}  {self.TYPE.lower()} {self.mode_name()}: "
         ret += " ".join([x.name() for x in self.notes])
         return ret
 
-# TODO add chromatic, nonatonic, tetratonic scales  https://en.wikipedia.org/wiki/Scale_(music)
+
+class NonatonicScale(Scale):
+    TYPE = "Nonatonic"
+    NOTES_CNT = 9
+    INTERVALS = {
+        "blues":  "211122111"
+    }
+
+    def _normalize(self):
+        if len(self.notes) == 0:
+            return True
+
+        if self.mode == "blues":
+            heptatonic = HeptatonicScale(self._root_note, "major", self._octave)
+            self.notes = heptatonic.notes.copy()
+            blue_note_1 = Note(self.notes[0].name()) + 3
+            blue_note_1.use_other_name(suggested_root=self.notes[2].name()[0])
+            blue_note_2 = Note(self.notes[0].name()) + 10
+            blue_note_2.use_other_name(suggested_root=self.notes[6].name()[0])
+            self.notes.insert(6, blue_note_2)
+            self.notes.insert(2, blue_note_1)
+            return True
+
+        return True
